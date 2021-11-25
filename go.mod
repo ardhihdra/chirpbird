@@ -1,4 +1,4 @@
-module github.com/ardhihdra/chirpbird/backend
+module github.com/ardhihdra/chirpbird
 
 go 1.17
 

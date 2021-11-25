@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/ardhihdra/chirpbird/backend/chat"
+	"github.com/ardhihdra/chirpbird/chat"
 )
 
 var (
