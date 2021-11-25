@@ -1,0 +1,22 @@
+.txt-header {
+    font-size: calc(19px + .5vmin);
+    font-weight: 650;
+    color: var(--green);
+}
+
+.txt-subheader {
+    font-size: calc(12px + .5vmin);
+}
+  
+.txt-topic {
+    font-size: calc(11px + .5vmin);
+}
+
+.txt-desc {
+    font-size: calc(10px + .5vmin);
+}
+
+.txt-writing {
+    /* letter-spacing: 0.1em; */
+    line-height: 1.6rem;
+}

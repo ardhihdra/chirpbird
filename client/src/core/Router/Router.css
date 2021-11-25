@@ -1,0 +1,70 @@
+.ds-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 550px;
+}
+
+.pages-container {
+    width: 100vw;
+    max-width: 600px;
+}
+
+.router-container {
+    position: fixed;
+    /* left: 43vw; */
+    bottom: .5vh;
+    height: 4.5rem;
+    width: 20rem;
+
+    display: flex;
+    justify-content: center;
+    margin-right: auto;
+    margin-left: auto;
+    
+    background-color: white;
+    border: 1px hidden black;
+    /* border-bottom-style: solid; */
+    border-radius: 8px;
+    opacity: 0.9;
+    margin: 1rem 0 .5rem 0;
+    transition: top 2s;
+}
+
+.router-container:hover {
+    opacity: 1;
+    background-color: white;
+    /* background-color: rgb(222, 222, 222); */
+    
+}
+  
+.router-list {
+    font-size: 8pt;
+    padding: .5rem;
+    padding-right: .9rem;
+    display: flex;
+    text-align: center;
+    /* flex-direction: row; */
+}
+
+.router-box {
+    background-color: var(--green-secondary);
+    border-radius: var(--border-radius-lg);
+    /* border: 1px solid var(--green); */
+    min-height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    margin: .3rem .35rem .3rem .5rem;
+    padding: .4rem;
+    opacity: .5;
+}
+
+.router-box:hover {
+    opacity: 1;
+}
+
+.main-icon {
+    height: 2rem;
+    padding-top: .3rem;
+    pointer-events: none;
+}
