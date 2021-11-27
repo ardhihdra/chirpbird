@@ -1,0 +1,68 @@
+.App-logo {
+    height: 18vh;
+    margin: 2rem 1rem .5rem 1rem;
+    pointer-events: none;
+}
+
+.search-title {
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 5px;
+}
+
+.search-subtitle {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 20px 0 40px 0;
+}
+
+.ds-border {
+    background-color: rgb(255, 255, 255);
+}
+
+.form-container {
+    min-height: 50vh;
+    text-align: center;
+    max-width: 350px;
+    margin: 0 auto 2rem auto;
+    padding: 1rem 3rem;
+    background-color: var(--whitesmoke);
+}
+
+.contact-info {
+    min-height: 20vh;    
+    color: var(--green);
+    font-weight: 600;
+    font-size: calc(12px + .5vmin);
+}
+
+.contact-flex {
+    display: flex;
+    justify-content: center;
+    margin: 0 .5rem 2rem 1.5rem;
+    text-align: left;
+}
+
+.logo {
+    height: 26px;
+    padding: 4px;
+}
+
+.logo:hover {
+    border-radius: 50%;
+    background-color: var(--blue-tertiary);
+}
+
+.copyable {
+    cursor: copy;
+}
+
+.grow2 {
+    flex-grow: 2;
+}
+
+.hashtag {
+    font-weight: 700;
+    font-size: calc(14px + .5vmin);
+    word-spacing: .5rem;
+}

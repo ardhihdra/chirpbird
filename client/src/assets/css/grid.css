@@ -6,12 +6,14 @@
 }
   
 .ds-border {
-    border: solid 1px var(--grey-border);
+    border: solid 0 var(--grey-border);
+    box-shadow: var(--grey) 0px 7px 29px 0px;
     border-radius: var(--border-radius-xlg);
 }
 
 .ds-shadow {
-    box-shadow: '5px 2px 8px #c3c3c3';
+    box-shadow: var(--grey) 0px 7px 29px 0px;
+    /* box-shadow: '5px 2px 8px #c3c3c3'; */
 }
 
 .ds-container {

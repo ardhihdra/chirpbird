@@ -1,24 +1,24 @@
 import Home from "../../pages/Home";
+import Dashboard from "../../pages/Dashboard";
 import About from "../../pages/About";
-import Pictures from "../../pages/Pictures";
 
-import homeIcon from '../../assets/img/023-home.png';
-import newsFeed from '../../assets/img/006-newsfeed.png';
-import follower from '../../assets/img/021-follower.png';
+import homeIcon from '../../assets/img/icons/023-home.png';
+import newsFeed from '../../assets/img/icons/006-newsfeed.png';
+import follower from '../../assets/img/icons/021-follower.png';
 
 const menus = [
   {
     path: "/",
     exact: true,
     icon: homeIcon,
-    title: 'Order',
+    title: 'Chirpbird',
     main: () => <Home></Home>
   },
   {
-    path: "/catalogue",
+    path: "/dashboard",
     icon: newsFeed,
-    title: 'catalogue',
-    main: () => <Pictures></Pictures> 
+    title: 'Dashboard',
+    main: () => <Dashboard></Dashboard> 
     //   sidebar: () => <div>shoelaces!</div>,
   },
   {
@@ -27,6 +27,15 @@ const menus = [
     icon: follower,
     title: 'about',
     main: () => <About></About>
+  },
+  {
+    path: "*",
+    title: '404',
+    main: () => {
+      <main style={{ padding: "1rem" }}>
+        <p>There's nothing here!</p>
+      </main>
+    }
   },
 ];
 

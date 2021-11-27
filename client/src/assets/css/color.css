@@ -1,5 +1,8 @@
 :root {
-    --blue: #419efb;
+    --blue: rgb(4, 115, 192);
+    --blue-soft: rgb(84, 141, 182);
+    --blue-secondary: rgb(54, 169, 251);
+    --blue-tertiary: rgb(149, 207, 249);
     --white: #ffffff; 
     --space: white;
     --space-dark: #282c34;
@@ -10,8 +13,16 @@
     --green-secondary: rgb(32, 190, 35);
     --yellow: rgb(255, 255, 84);
     --red: red;
+    --grey: rgba(100, 100, 111, 0.2);
     --grey-border: rgb(195, 195, 195);
     --whitesmoke: whitesmoke;
+
+    /* font */
+    --white-font: white;
+    --dark-font: rgb(145, 145, 145);
+    --primary-font: var(--blue-soft);
+
+    --main-background: var(--blue-soft);
 }
 
 .b-blue {

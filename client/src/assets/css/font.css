@@ -1,19 +1,19 @@
 .txt-header {
     font-size: calc(19px + .5vmin);
     font-weight: 650;
-    color: var(--green);
+    color: var(--white-font);
 }
 
 .txt-subheader {
-    font-size: calc(12px + .5vmin);
+    font-size: calc(16px + .5vmin);
 }
   
 .txt-topic {
-    font-size: calc(11px + .5vmin);
+    font-size: calc(14px + .5vmin);
 }
 
 .txt-desc {
-    font-size: calc(10px + .5vmin);
+    font-size: calc(12px + .5vmin);
 }
 
 .txt-writing {

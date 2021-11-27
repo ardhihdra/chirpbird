@@ -70,8 +70,9 @@
 
 .App-main {
   height: 100%;
-  background-image: url('../../assets/img/background.jpeg');
+  /* background-image: url('../../assets/img/background.jpeg'); */
   /* background-repeat: no-repeat; */
+  background-color: var(--main-background);
   background-attachment: fixed;
   background-size: cover;
 }

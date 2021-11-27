@@ -1,7 +1,7 @@
 import React from "react";
 import {
     BrowserRouter as Router,
-    Switch,
+    Routes,
     Route,
     Link
 } from "react-router-dom";
@@ -30,18 +30,18 @@ export default function AppRouter() {
     return (
         <Router>
             <div className="ds-flow">
-                <Switch>
+                <Routes>
                     {   
                         listRoutes.map((route, index) => (
                                 <Route
                                     key={index}
                                     path={route.path}
                                     exact={route.exact}
-                                    children={<route.main />}
+                                    element={<route.main />}
                                 />
                         ))
                     }
-                </Switch>
+                </Routes>
 
                 
                 <div id="router-container" className="router-container fade-in">

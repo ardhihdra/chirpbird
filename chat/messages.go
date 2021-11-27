@@ -1,9 +1,7 @@
 package chat
 
-import "github.com/gorilla/websocket"
-
-type User struct {
-	Username string
-	Conn     *websocket.Conn
-	Global   *Chat
+type Message struct {
+	ID     int64  `json:"id"`
+	Body   string `json:"body"`
+	Sender string `json:"sender"`
 }

@@ -29,6 +29,8 @@
     opacity: 0.9;
     margin: 1rem 0 .5rem 0;
     transition: top 2s;
+
+    display: none;
 }
 
 .router-container:hover {

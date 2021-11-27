@@ -1,3 +1,46 @@
+/* -------- */
+/* override */
+/* -------- */
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: fade(gray, 35%); 
+  border-radius: 12px;
+  /* width: 1rem; */
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: transparent; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  width: 200px;
+  background: red;
+}
+
+a, a:hover, a:focus, a:active {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style-type:none;
+}
+
+html {
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+hr {
+  height: 1px;
+  border-width:0;
+  margin: 1rem 0;
+  background-color: var(--blue-tertiary);
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,6 +48,13 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+            
+  padding: 0;
+  margin: 0;
+  position: relative;
+  color: var(--white-font);
+  background-color: var(--blue);
+
 }
 
 code {

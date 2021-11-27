@@ -31,6 +31,8 @@ func Start(port string) {
 		w.Write([]byte("Hello from go-chat-react!"))
 	})
 
+	http.HandleFunc("/login", handleLogin())
+
 	go c.Run()
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
@@ -44,4 +46,55 @@ func (c *Chat) Run() {
 			log.Printf("joined")
 		}
 	}
+}
+
+func handleLogin() http.HandlerFunc {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			// q := r.URL.Query().Get("q")
+			if r.Method != "POST" {
+				w.WriteHeader(http.StatusNotFound)
+				w.Write([]byte("not found"))
+				return
+			}
+			username := r.FormValue("username")
+			country := r.FormValue("country")
+			interests := r.FormValue("interests")
+			profile := r.FormValue("profile")
+
+			message := fmt.Sprintf("Hello %s, %s, %s, %s", username, country, interests, profile)
+			w.Write([]byte(message))
+		})
+}
+
+func checkUniqueUsername() http.HandlerFunc {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			// GET users with username
+		})
+}
+
+func dashboardData() http.HandlerFunc {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			// GET all users, users by interests, users by country,
+			// GET all rooms, rooms by interests, rooms by country
+
+		})
+}
+
+func roomsData() http.HandlerFunc {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			// GET room detail
+			// CREATE a room
+
+		})
+}
+
+func searchStuff() http.HandlerFunc {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			// GET search by name, profile,
+		})
 }
