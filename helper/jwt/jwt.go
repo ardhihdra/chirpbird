@@ -1,13 +1,14 @@
 package jwt
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"net/http"
 
-	"fmt"
-	"time"
-	"github.com/ant0ine/go-json-rest/rest"
-	"strings"
+	"github.com/golang-jwt/jwt"
+
 	"errors"
+	"fmt"
+	"strings"
+	"time"
 )
 
 const alg = "HS256"
@@ -35,7 +36,7 @@ func Create(userID string) string {
 	return tokenStr
 }
 
-func Parse(r *rest.Request) (*JWTToken, error) {
+func Parse(r *http.Request) (*JWTToken, error) {
 	tokenStr := getTokenString(r)
 	if tokenStr == "" {
 		return nil, errors.New("jwt token invalid")
@@ -58,7 +59,7 @@ func Parse(r *rest.Request) (*JWTToken, error) {
 	}
 }
 
-func getTokenString(r *rest.Request) string {
+func getTokenString(r *http.Request) string {
 	ah := r.Header.Get("Authorization")
 	if ah == "" || len(ah) < 8 || strings.ToLower(ah[:6]) != "bearer" {
 		return ""

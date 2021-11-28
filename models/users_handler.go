@@ -1,6 +1,10 @@
 package models
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
 	"strings"
 
 	"github.com/ardhihdra/chirpbird/db"
@@ -9,8 +13,8 @@ import (
 	"github.com/twinj/uuid"
 
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type usersHandler struct {
@@ -101,17 +105,28 @@ func (h *usersHandler) PasswordValid(u *User) error {
 
 func (h *usersHandler) ByUsername(username string) (*User, error) {
 	var u *User
-	return u, db.DB.Users.Find(bson.M{"username": strings.ToLower(username)}).One(&u)
+	query := map[string]interface{}{
+		"username":        strings.ToLower(username),
+		"_source":         true,
+		"terminate_after": 1,
+	}
+	return u, FindOne(query, db.IndexList.Users, u)
 }
 
 func (h *usersHandler) ByEmail(email string) (*User, error) {
 	var u *User
-	return u, db.DB.Users.Find(bson.M{"username": strings.ToLower(email)}).One(&u)
+	query := map[string]interface{}{
+		"email": strings.ToLower(email),
+	}
+	return u, FindOne(query, db.IndexList.Users, u)
 }
 
 func (h *usersHandler) ByID(ID string) (*User, error) {
 	var u *User
-	return u, db.DB.Users.FindId(ID).One(&u)
+	query := map[string]interface{}{
+		"id": strings.ToLower(ID),
+	}
+	return u, FindOne(query, db.IndexList.Users, u)
 }
 
 func (h *usersHandler) Auth(userPassword, password string) bool {
@@ -119,4 +134,49 @@ func (h *usersHandler) Auth(userPassword, password string) bool {
 		return false
 	}
 	return true
+}
+
+func FindOne(query map[string]interface{}, index string, usr *User) error {
+	var b bytes.Buffer
+	executeQuery(query, index, &b)
+	values := gjson.GetManyBytes(b.Bytes(), "hits.hits.0._id", "hits.hits.0._source")
+	json.Unmarshal([]byte(values[1].String()), &usr)
+	// usr.ID = values[0].String()
+	fmt.Println(values)
+	return nil
+}
+
+func FindAll(query map[string]interface{}, index string, usr *[]User) error {
+	var b bytes.Buffer
+	executeQuery(query, index, &b)
+	values := gjson.GetManyBytes(b.Bytes(), "hits.hits.0._id", "hits.hits")
+	json.Unmarshal([]byte(values[1].String()), &usr)
+	return nil
+}
+
+func executeQuery(query map[string]interface{}, index string, b *bytes.Buffer) error {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(query); err != nil {
+		log.Fatalf("Error encoding: %s", err)
+		return err
+	}
+	// return u, db.DB.Users.Find(bson.M{"username": strings.ToLower(username)}).One(&u)
+	searchRes, err := db.Elastic.Search(
+		db.Elastic.Search.WithIndex(index),
+		db.Elastic.Search.WithBody(&buf),
+		db.Elastic.Search.WithPretty(),
+	)
+	if err != nil {
+		fmt.Printf("Error searching: %s\n", err)
+		// os.Exit(2)
+		return err
+	}
+	defer searchRes.Body.Close()
+	if searchRes.IsError() {
+		db.PrintErrorResponse(searchRes)
+	}
+
+	// parse with gjson
+	b.ReadFrom(searchRes.Body)
+	return nil
 }

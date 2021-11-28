@@ -57,10 +57,12 @@ func (r *redisHelper) Subscribe(f func(string, []byte)) error {
 
 	for {
 		switch v := psc.Receive().(type) {
-		case redis.PMessage:
+		case redis.Message:
 			f(v.Channel, v.Data)
 		case error:
 			return v
 		}
+		// Subscription
+		// Notify application when all channels are subscribed.
 	}
 }
