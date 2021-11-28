@@ -18,8 +18,6 @@ type Chat struct {
 var upgrader = websocket.Upgrader{}
 
 func Start(port string) {
-	log.Printf("listening to %s", port)
-
 	c := &Chat{
 		users:    make(map[string]*User),
 		messages: make(chan *Message),
@@ -27,15 +25,7 @@ func Start(port string) {
 		leave:    make(chan *User),
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello from go-chat-react!"))
-	})
-
-	http.HandleFunc("/login", handleLogin())
-
 	go c.Run()
-
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
 func (c *Chat) Run() {
