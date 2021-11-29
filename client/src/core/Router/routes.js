@@ -1,5 +1,5 @@
-import Home from "../../pages/Home";
-import Dashboard from "../../pages/Dashboard";
+import Login from "../../pages/Login.jsx";
+import Dashboard from "../../pages/Dashboard.jsx";
 import About from "../../pages/About";
 
 import homeIcon from '../../assets/img/icons/023-home.png';
@@ -12,10 +12,10 @@ const menus = [
     exact: true,
     icon: homeIcon,
     title: 'Chirpbird',
-    main: () => <Home></Home>
+    main: () => <Login></Login>
   },
   {
-    path: "/dashboard",
+    path: "/dashboard/:token",
     icon: newsFeed,
     title: 'Dashboard',
     main: () => <Dashboard></Dashboard> 

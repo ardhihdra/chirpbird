@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Input from '../components/Input'
 
 import tele from '../assets/img/icons/telegram.png';
@@ -80,9 +80,14 @@ class LoginForm extends React.Component {
   
     handleSubmit = (event) => {
         event.preventDefault();
-        // let navigate = useNavigate();
-        // let params = useParams();
 
+        // const phoneIndoRegex = /\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/
+        const nameExist = this.state.username && this.state.username.length
+        if(!nameExist) this.setState({error_message: 'Username cannot be null!\n'})
+        if(nameExist) {
+            this.setState({'isConfirmationShow': true})
+            this.setState({'error_message': ''})
+        }
         const data = new FormData()
         const form = {}
         const payload = ['username', 'country', 'interests', 'profile']
@@ -93,14 +98,15 @@ class LoginForm extends React.Component {
                 data.append(st, this.state[st])
             }
         }
-        axios.post(`${MASTER_URL}/login`, data, {
+        axios.post(`${MASTER_URL}/register`, data, {
                 headers: { "Content-Type": 'multipart/form-data' }
             })
             .then(response => {
                 if(response instanceof Error) throw response
-                this.props.navigate('/dashboard')
+                this.props.navigate(`/dashboard/${response.data.data.id}`)
             }).catch(function (error) {
-                alert('Login failed')
+                alert('Login failed', error)
+                this.setState({error_message: error})
                 console.log(error);
             })
     }
@@ -128,14 +134,6 @@ class LoginForm extends React.Component {
     }
 
     confirmOrder = () => {
-        // const phoneIndoRegex = /\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/
-        const nameExist = this.state.username && this.state.username.length
-        if(!nameExist) this.setState({error_message: 'Username cannot be null!\n'})
-        if(nameExist) {
-            this.setState({'isConfirmationShow': true})
-            this.setState({'error_message': ''})
-        }
-        this.props.navigate('/dashboard')
     }
 
     styling() {
@@ -279,7 +277,7 @@ class LoginForm extends React.Component {
                 placeholder="Add some details so people can know you better *optional though" 
                 onChange={this.handleChange}/>
                 <button className="ds-m-2 ds-mb-5" style={style.buttonClear} type="button" onClick={() => this.changePage(0)}>Back</button>
-                <button className="ds-m-2 ds-mb-5" style={style.buttonSolid} type="button" value="Submit" onClick={this.confirmOrder}>Submit</button>
+                <button className="ds-m-2 ds-mb-5" style={style.buttonSolid} type="submit" value="Submit">Submit</button>
             </div>
         )
 

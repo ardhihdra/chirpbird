@@ -29,7 +29,7 @@ export default function AppRouter() {
     }
     return (
         <Router>
-            <div className="ds-flow">
+            <div>
                 <Routes>
                     {   
                         listRoutes.map((route, index) => (

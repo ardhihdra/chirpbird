@@ -3,6 +3,7 @@
     --blue-soft: rgb(84, 141, 182);
     --blue-secondary: rgb(54, 169, 251);
     --blue-tertiary: rgb(149, 207, 249);
+    --blue-dark: rgb(50, 73, 90);
     --white: #ffffff; 
     --space: white;
     --space-dark: #282c34;
@@ -23,6 +24,7 @@
     --primary-font: var(--blue-soft);
 
     --main-background: var(--blue-soft);
+    --secondary-background: var(--blue-dark);
 }
 
 .b-blue {

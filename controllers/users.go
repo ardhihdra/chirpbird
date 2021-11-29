@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/ardhihdra/chirpbird/helper/jwt"
 	"github.com/ardhihdra/chirpbird/models"
@@ -55,6 +56,16 @@ func (usr *UsersController) Register() http.HandlerFunc {
 				w.Write([]byte("not found"))
 				return
 			}
+			interests := r.FormValue("interests")
+			user := models.User{
+				ID:        "1",
+				Username:  r.FormValue("username"),
+				Country:   r.FormValue("country"),
+				Profile:   r.FormValue("profile"),
+				Interests: strings.Split(interests, ","),
+			}
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]models.User{"data": user})
 		})
 
 }
