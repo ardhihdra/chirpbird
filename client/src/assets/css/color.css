@@ -20,6 +20,7 @@
 
     /* font */
     --white-font: white;
+    --grey-font: rgb(210, 210, 210);
     --dark-font: rgb(145, 145, 145);
     --primary-font: var(--blue-soft);
 

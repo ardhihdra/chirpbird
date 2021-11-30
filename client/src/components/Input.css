@@ -1,11 +1,19 @@
 input[type=text], textarea, select {
     width: 100%;
     padding: 12px 20px;
-    margin: 8px 0;
+    margin: 2px 0;
     display: inline-block;
     border: 1px solid #ccc;
     border-radius: var(--border-radius-norm);
     box-sizing: border-box;
+}
+
+.transparent {
+    background-color: transparent;
+}
+
+.night-mode {
+    color: white;
 }
 
 select {

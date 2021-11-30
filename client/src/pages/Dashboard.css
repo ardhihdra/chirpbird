@@ -59,14 +59,16 @@
 
 .tes2 {
     border: 1px solid orange;
-    background-color: grey;
+    background-color: violet;
 }
 
 .header-menu {
     display: flex;
     width: 100%;
     height: 40px;
-    padding: 1rem 1rem 0 2rem;
+    padding: .5rem 1rem;
+    background-color: var(--secondary-background);
+    border-bottom: 1px solid var(--grey);
 }
 
 .dashboard-container {
@@ -75,14 +77,46 @@
 }
 
 .left-menu {
-    width: 400px;
+    width: 37vw;
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    background-color: var(--grey);
+    border-right: 1px solid var(--grey);
+    overflow-y: scroll;
+}
+
+.transparent {
+    background-color: transparent;
+}
+
+.search-input {
+    width: 320px;
+}
+
+.room-pict {
+
+}
+
+.room-title {
+    text-align: left;
+}
+
+.room-search {
+    margin-left: auto;
+}
+
+.room-preview-box {
+    height: 3rem;
+    padding: 10px;
+    border-bottom: 1px solid var(--grey);
+    border-top: 1px solid var(--grey);
 }
 
 .chatbox {
     padding: 1rem;
+    width: 63vw;
+    background-color: var(--main-background);
 }
 
 .modal {

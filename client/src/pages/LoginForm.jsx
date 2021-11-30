@@ -104,7 +104,7 @@ class LoginForm extends React.Component {
             .then(response => {
                 if(response instanceof Error) throw response
                 this.props.navigate(`/dashboard/${response.data.data.id}`)
-            }).catch(function (error) {
+            }).catch((error) => {
                 alert('Login failed', error)
                 this.setState({error_message: error})
                 console.log(error);

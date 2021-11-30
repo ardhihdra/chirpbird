@@ -96,3 +96,23 @@
   background-color: var(--secondary-background);
   font-size: 8pt;
 }
+
+.ds-flex {
+  display: flex;
+  flex-direction: row;
+}
+
+.ds-flex-rev {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.ds-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.ds-flex-col-rev {
+  display: flex;
+  flex-direction: column-reverse;
+}
