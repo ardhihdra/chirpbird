@@ -25,6 +25,11 @@
     color: var(--grey-font);
 }
 
+.txt-desc-meta-sm {
+    font-size: calc(6px + .5vmin);
+    color: var(--grey-font);
+}
+
 .txt-writing {
     /* letter-spacing: 0.1em; */
     line-height: 1.6rem;

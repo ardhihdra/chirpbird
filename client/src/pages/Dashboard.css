@@ -91,15 +91,26 @@
 }
 
 .search-input {
-    width: 320px;
+    width: 30vw;
 }
 
 .room-pict {
-
+    border-radius: 50%;
+    background-color: thistle;
 }
 
 .room-title {
     text-align: left;
+    width: 24vw;
+}
+
+.room-unread {
+    background-color: var(--whitesmoke);
+    color: var(--dark-font);
+    height: 20px;
+    width: 24px;
+    border-radius: 6px;
+
 }
 
 .room-search {
@@ -113,10 +124,46 @@
     border-top: 1px solid var(--grey);
 }
 
-.chatbox {
+.room-preview-box:hover {
+    background-color: var(--main-background);
+}
+
+.chat-container {
     padding: 1rem;
     width: 63vw;
+    height: 90vh;
     background-color: var(--main-background);
+}
+
+.chatbox {
+    text-align: left;
+    height: 3rem;
+    padding: 10px;
+}
+
+.chat-username {
+    font-weight: 600;
+    color: thistle;
+}
+
+.chat-content {
+    width: 51vw;
+    height: fit-content;
+}
+
+.texting-box {
+    border-bottom: 1px solid var(--grey-border);
+    position: fixed;
+    bottom: 13px;
+    left: 36.2vw;
+    width: 64vw;
+    height: fit-content;
+    max-height: 180px;
+    background-color: var(--secondary-background);
+}
+
+.texting-input {
+    min-width: 50vw;
 }
 
 .modal {
