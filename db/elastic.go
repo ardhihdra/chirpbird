@@ -69,10 +69,10 @@ func PrintErrorResponse(res *esapi.Response) {
 	fmt.Printf("[%s] ", res.Status())
 	var e map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
-		log.Fatalf("Error parsing the response body: %s", err)
+		log.Fatalf("ES, Error parsing the response body: %s", err)
 	} else {
 		// Print the response status and error information.
-		log.Fatalf("[%s] %s: %s",
+		log.Fatalf("ES, [%s] %s: %s",
 			res.Status(),
 			e["error"].(map[string]interface{})["type"],
 			e["error"].(map[string]interface{})["reason"],

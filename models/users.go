@@ -1,10 +1,7 @@
 package models
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/ardhihdra/chirpbird/db"
@@ -25,7 +22,11 @@ type User struct {
 func (u *User) UsernameAvailable() bool {
 	// res, _ := datastore.DB.Users.Find(bson.M{"username": strings.ToLower(u.Username)}).Count()
 	query := map[string]interface{}{
-		"username": strings.ToLower(u.Username),
+		"query": map[string]interface{}{
+			"match": map[string]interface{}{
+				"username": strings.ToLower(u.Username),
+			},
+		},
 	}
 	var users []User
 	err := FindAll(query, db.IndexList.Users, &users)
@@ -36,7 +37,6 @@ func (u *User) UsernameAvailable() bool {
 }
 
 func (u *User) EmailAvailable() bool {
-	// res, _ := datastore.DB.Users.Find(bson.M{"email": strings.ToLower(u.Email)}).Count()
 	query := map[string]interface{}{
 		"email": strings.ToLower(u.Email),
 	}
@@ -46,26 +46,4 @@ func (u *User) EmailAvailable() bool {
 		fmt.Println("error find avail email")
 	}
 	return len(users) == 0
-}
-
-func (u *User) Create() error {
-	// return datastore.DB.Users.Insert(u)
-	userMarshal, _ := json.Marshal(u)
-	res, err := db.Elastic.Index(
-		db.IndexList.Users,                     // Index name
-		strings.NewReader(string(userMarshal)), // Document body
-		db.Elastic.Index.WithDocumentID(u.ID),  // Document ID
-		db.Elastic.Index.WithRefresh("true"),   // Refresh
-	)
-	if err != nil {
-		log.Fatalf("ERROR: %s", err)
-	}
-	defer res.Body.Close()
-	if res.IsError() {
-		db.PrintErrorResponse(res)
-	}
-
-	var b bytes.Buffer
-	b.ReadFrom(res.Body)
-	return nil
 }

@@ -27,39 +27,33 @@ func NewUsersHandler() *usersHandler {
 	}
 }
 
-func (h *usersHandler) Register(username, email, password string) (*User, error) {
-	u := &User{
-		ID:        uuid.NewV4().String(),
-		Username:  username,
-		Email:     email,
-		Password:  password,
-		CreatedAt: helper.Timestamp(),
-		UpdatedAt: helper.Timestamp(),
-	}
-
+func (h *usersHandler) Register(u *User) (*User, error) {
+	u.ID = uuid.NewV4().String()
 	u.Username = strings.TrimSpace(u.Username)
-	u.Email = strings.TrimSpace(u.Email)
-	u.Password = strings.TrimSpace(u.Password)
+	// u.Email = strings.TrimSpace(u.Email)
+	// u.Password = strings.TrimSpace(u.Password)
+	u.CreatedAt = helper.Timestamp()
+	u.UpdatedAt = helper.Timestamp()
 
 	if err := h.UsernameValid(u); err != nil {
 		return nil, err
 	}
 
-	if err := h.EmailValid(u); err != nil {
-		return nil, err
-	}
+	// if err := h.EmailValid(u); err != nil {
+	// 	return nil, err
+	// }
 
-	if err := h.PasswordValid(u); err != nil {
-		return nil, err
-	}
+	// if err := h.PasswordValid(u); err != nil {
+	// 	return nil, err
+	// }
 
-	hpass, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-	u.Password = string(hpass)
+	// hpass, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// u.Password = string(hpass)
 
-	if err := u.Create(); err != nil {
+	if err := Create(u); err != nil {
 		return nil, err
 	}
 
@@ -75,7 +69,7 @@ func (h *usersHandler) UsernameValid(u *User) error {
 	//	return errors.New("username invalid")
 	//}
 
-	if u.UsernameAvailable() {
+	if !u.UsernameAvailable() {
 		return errors.New("username exists")
 	}
 	return nil
@@ -121,12 +115,12 @@ func (h *usersHandler) ByEmail(email string) (*User, error) {
 	return u, FindOne(query, db.IndexList.Users, u)
 }
 
-func (h *usersHandler) ByID(ID string) (*User, error) {
-	var u *User
+func (h *usersHandler) ByID(ID string) (User, error) {
+	var u User
 	query := map[string]interface{}{
 		"id": strings.ToLower(ID),
 	}
-	return u, FindOne(query, db.IndexList.Users, u)
+	return u, FindOne(query, db.IndexList.Users, &u)
 }
 
 func (h *usersHandler) Auth(userPassword, password string) bool {
@@ -134,6 +128,27 @@ func (h *usersHandler) Auth(userPassword, password string) bool {
 		return false
 	}
 	return true
+}
+
+func Create(u *User) error {
+	userMarshal, _ := json.Marshal(u)
+	res, err := db.Elastic.Index(
+		db.IndexList.Users,                     // Index name
+		strings.NewReader(string(userMarshal)), // Document body
+		db.Elastic.Index.WithDocumentID(u.ID),  // Document ID
+		db.Elastic.Index.WithRefresh("true"),   // Refresh
+	)
+	if err != nil {
+		log.Fatalf("ERROR: %s", err)
+		return err
+	}
+	defer res.Body.Close()
+	if res.IsError() {
+		db.PrintErrorResponse(res)
+		return err
+	}
+
+	return nil
 }
 
 func FindOne(query map[string]interface{}, index string, usr *User) error {

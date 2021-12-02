@@ -89,24 +89,21 @@ class LoginForm extends React.Component {
             this.setState({'error_message': ''})
         }
         const data = new FormData()
-        const form = {}
-        const payload = ['username', 'country', 'interests', 'profile']
-        for(let st in this.state) {
-            if(payload.includes(st)) {
-                // console.log(st, this.state[st])
-                form[st] = this.state[st]
-                data.append(st, this.state[st])
-            }
-        }
+        data.append('username', this.state['username'])
+        data.append('country', this.state['country'])
+        data.append('interests', this.state['interests'])
+        data.append('profile', this.state['profile'])
+
         axios.post(`${MASTER_URL}/register`, data, {
                 headers: { "Content-Type": 'multipart/form-data' }
             })
             .then(response => {
                 if(response instanceof Error) throw response
+                sessionStorage.setItem('token', response.data.token);
+                localStorage.setItem('userinfo', JSON.stringify(response.data.data));
                 this.props.navigate(`/dashboard/${response.data.data.id}`)
             }).catch((error) => {
                 alert('Login failed', error)
-                this.setState({error_message: error})
                 console.log(error);
             })
     }

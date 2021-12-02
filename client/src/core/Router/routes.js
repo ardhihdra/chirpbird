@@ -15,7 +15,7 @@ const menus = [
     main: () => <Login></Login>
   },
   {
-    path: "/dashboard/:token",
+    path: "/dashboard/:id",
     icon: newsFeed,
     title: 'Dashboard',
     main: () => <Dashboard></Dashboard> 

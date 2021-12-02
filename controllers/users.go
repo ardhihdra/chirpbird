@@ -57,17 +57,32 @@ func (usr *UsersController) Register() http.HandlerFunc {
 				return
 			}
 			interests := r.FormValue("interests")
+			username := r.FormValue("username")
+			country := r.FormValue("country")
+			profile := r.FormValue("profile")
 			user := models.User{
 				ID:        "1",
-				Username:  r.FormValue("username"),
-				Country:   r.FormValue("country"),
-				Profile:   r.FormValue("profile"),
+				Username:  username,
+				Country:   country,
+				Profile:   profile,
 				Interests: strings.Split(interests, ","),
 			}
+			_, err := users.Register(&user)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("failed to register"))
+				return
+			}
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]models.User{"data": user})
+			json.NewEncoder(w).Encode(map[string]interface{}{"data": user, "token": jwt.Create(user.ID)})
 		})
+}
 
+func (usr *UsersController) CheckUniqueUsername() http.HandlerFunc {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			// GET users with username
+		})
 }
 
 func saveLogin(username, country, profile string, interests []string) (*models.User, error) {

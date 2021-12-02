@@ -76,7 +76,7 @@
     height: calc(100vh - 70px);
 }
 
-.left-menu {
+.left-container {
     width: 37vw;
     height: 100%;
     overflow-y: auto;
@@ -129,7 +129,7 @@
 }
 
 .chat-container {
-    padding: 1rem;
+    padding: 1rem 0;
     width: 63vw;
     height: 90vh;
     background-color: var(--main-background);
@@ -138,7 +138,6 @@
 .chatbox {
     text-align: left;
     height: 3rem;
-    padding: 10px;
 }
 
 .chat-username {
@@ -154,9 +153,8 @@
 .texting-box {
     border-bottom: 1px solid var(--grey-border);
     position: fixed;
-    bottom: 13px;
-    left: 36.2vw;
-    width: 64vw;
+    bottom: 12px;
+    width: 100%;
     height: fit-content;
     max-height: 180px;
     background-color: var(--secondary-background);
@@ -164,8 +162,4 @@
 
 .texting-input {
     min-width: 50vw;
-}
-
-.modal {
-
 }
