@@ -1,0 +1,27 @@
+version: "2"
+
+volumes:
+  elasticdata:
+    driver: local
+
+services:
+  app:
+    image: chirpbird
+    build: .
+    environment:
+        PORT: 80
+        CLIENT: elastic
+    depends_on:
+      - elastic
+    ports:
+      - 4000:80
+  elastic:
+    image: elasticsearch:latest
+    container_name: elastic
+    privileged: true
+    tty: true
+    # environment:
+    ports:
+      - "9200"
+    volumes:
+      - elasticdata:/var/lib/elasticsearch/data

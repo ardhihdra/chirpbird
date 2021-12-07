@@ -1,13 +1,13 @@
 import React from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
-import Input from '../components/Input'
+import Input from '../../components/Input'
 
-import tele from '../assets/img/icons/telegram.png';
-import mail from '../assets/img/icons/009-message.png';
+import tele from '../../assets/img/icons/telegram.png';
+import mail from '../../assets/img/icons/009-message.png';
 /** thanks to https://gist.github.com/keeguon/2310008 */
 import countries from "./countries"
-const MASTER_URL = process.env.REACT_APP_MASTER_URL
+const MASTER_URL = `http://${process.env.REACT_APP_MASTER_URL}`
 const INTERESTS = [
     {id: 1, name: 'just bored', tag: 'social'},
     {id: 2, name: 'programming', tag: 'technology'},
@@ -28,33 +28,7 @@ class LoginForm extends React.Component {
 
         this.state = {
             countries: countries, isLoaded: true, username: '', country: '', interests: [], profile: '', page: 0, totalPage: 2,
-            rememberme: false, error_message: null};
-    }
-    
-
-    componentDidMount = () => {
-        // axios.get(`${MASTER_URL}/master/products`)
-        // .then(response => {
-        //     let result = response.data
-        //     let newState = {}
-        //     result.map(rs => {
-        //         this.products_price[rs.name] = rs.price
-        //         newState[rs.name] = -1
-        //         return rs
-        //     })
-        //     this.setState({
-        //         isLoaded: true,
-        //         products: result,
-        //         ...newState
-        //     });
-        // }, (error) => {
-        //     this.setState({
-        //         isLoaded: true,
-        //         error
-        //     });
-        // }).catch(function (error) {
-        //     console.log(error);
-        // })
+            rememberme: false, error_message: null, username_timeout: null};
     }
 
     calcPrice = (name, value) => {
@@ -75,12 +49,28 @@ class LoginForm extends React.Component {
             listCheckbox.push(value)
             value = listCheckbox
         }
+        if(event.target.name === 'username') {
+            if(this.state.username_timeout) clearTimeout(this.state.username_timeout)
+            const timeout = setTimeout(async () => {
+                console.log("Checking uname...")
+                const resp = await axios.post(`${MASTER_URL}/username?username=${value}`, {
+                    headers: { "Content-Type": 'multipart/form-data' }
+                })
+                const isValid = resp.data.valid
+                if(!isValid) {
+                    this.setState({error_message: 'Username is taken'})
+                } else {
+                    this.setState({error_message: null})
+                }
+                this.setState({username_timeout: null})
+            }, 1000)
+            this.setState({username_timeout: timeout})
+        }
         this.setState({[name]: value})
     }
-  
+
     handleSubmit = (event) => {
         event.preventDefault();
-
         // const phoneIndoRegex = /\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/
         const nameExist = this.state.username && this.state.username.length
         if(!nameExist) this.setState({error_message: 'Username cannot be null!\n'})
@@ -96,16 +86,21 @@ class LoginForm extends React.Component {
 
         axios.post(`${MASTER_URL}/register`, data, {
                 headers: { "Content-Type": 'multipart/form-data' }
-            })
-            .then(response => {
-                if(response instanceof Error) throw response
-                sessionStorage.setItem('token', response.data.token);
-                localStorage.setItem('userinfo', JSON.stringify(response.data.data));
-                this.props.navigate(`/dashboard/${response.data.data.id}`)
-            }).catch((error) => {
-                alert('Login failed', error)
-                console.log(error);
-            })
+        }).then(async response => {
+            if(response instanceof Error) throw response
+            localStorage.setItem('userinfo', JSON.stringify(response.data.data));
+            localStorage.setItem('token', response.data.token);
+
+            const config = {
+                headers: { 'Authorization': 'Bearer ' + response.data.token }
+            }
+            const resp = await axios.post(`${MASTER_URL}/sessions`, {}, config)
+            localStorage.setItem('access_token', JSON.stringify(resp.data.access_token));
+            this.props.navigate(`/`)
+        }).catch((error) => {
+            alert('Login failed', error)
+            console.log(error);
+        })
     }
 
     showCounter(name, e) {
@@ -118,11 +113,13 @@ class LoginForm extends React.Component {
 
     changePage = (val) => {
         if(val === 1) {
-            if(this.state.username && this.state.username.length) {
-                this.setState({error_message: ''})
-                this.setState({page: val})
-            } else {
+            if(!this.state.username || !this.state.username.length) {
                 this.setState({error_message: 'Username cannot be null!\n'})
+            } else if(this.state.error_message) {
+                this.setState({error_message: this.state.error_message + '!!'})
+            } else {
+                this.setState({error_message: null})
+                this.setState({page: val})
             }
         } else {
             this.setState({page: val})

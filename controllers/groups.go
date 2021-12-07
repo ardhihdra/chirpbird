@@ -9,7 +9,9 @@ import (
 	"github.com/ardhihdra/chirpbird/models"
 )
 
-type GroupsController struct{}
+type GroupsController struct {
+	BaseController
+}
 
 func NewGroupController() *GroupsController {
 	return &GroupsController{}
@@ -18,13 +20,13 @@ func NewGroupController() *GroupsController {
 func (gc *GroupsController) Create() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.Method != "POST" {
+			if r.Method != http.MethodPost {
 				w.WriteHeader(http.StatusNotFound)
 				w.Write([]byte("not found"))
 				return
 			}
-			user, err := Authenticate(r.FormValue("id"))
-			if err != nil {
+
+			if err := gc.Authenticate(r); err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 				return
@@ -33,8 +35,8 @@ func (gc *GroupsController) Create() http.HandlerFunc {
 			/** Init Group */
 			groupName := r.FormValue("name")
 			groupMember := strings.Split(r.FormValue("user_ids"), ",")
-			groupMember = append(groupMember, user.ID)
-			g, err := models.Groups.Create(groupName, user.ID, groupMember)
+			groupMember = append(groupMember, gc.User.ID)
+			g, err := models.Groups.Create(groupName, gc.User.ID, groupMember)
 			if err != nil {
 				w.WriteHeader(http.StatusBadGateway)
 				json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -57,7 +59,7 @@ func (gc *GroupsController) Create() http.HandlerFunc {
 func (gc *GroupsController) Join() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.Method != "PUT" {
+			if r.Method != http.MethodPut {
 				w.WriteHeader(http.StatusNotFound)
 				w.Write([]byte("not found"))
 				return
@@ -70,7 +72,7 @@ func (gc *GroupsController) Join() http.HandlerFunc {
 func (gc *GroupsController) Left() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.Method != "PUT" {
+			if r.Method != http.MethodPut {
 				w.WriteHeader(http.StatusNotFound)
 				w.Write([]byte("not found"))
 				return
@@ -103,12 +105,4 @@ func (gc *GroupsController) SearchStuff() http.HandlerFunc {
 		func(w http.ResponseWriter, r *http.Request) {
 			// GET search by name, profile,
 		})
-}
-
-func Authenticate(ID string) (models.User, error) {
-	user, err := users.ByID(ID)
-	if err != nil {
-		return user, err
-	}
-	return user, nil
 }

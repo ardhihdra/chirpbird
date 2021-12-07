@@ -18,7 +18,14 @@ func RemoveFromSlice(slice []string, elem string) []string {
 		}
 	}
 	if idx > -1 {
+		// order matters, not efficient
 		slice = append(slice[:idx], slice[idx+1:]...)
 	}
 	return slice
+}
+
+func RemoveByIdx(s []int, i int) []int {
+	// order doesnt matter
+	s[i] = s[len(s)-1]
+	return s[:len(s)-1]
 }

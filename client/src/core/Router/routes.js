@@ -1,4 +1,4 @@
-import Login from "../../pages/Login.jsx";
+import Login from "../../pages/login/Login.jsx";
 import Dashboard from "../../pages/Dashboard.jsx";
 import About from "../../pages/About";
 
@@ -9,6 +9,13 @@ import follower from '../../assets/img/icons/021-follower.png';
 const menus = [
   {
     path: "/",
+    exact: true,
+    icon: homeIcon,
+    title: 'Chirpbird',
+    main: () => <Dashboard></Dashboard> 
+  },
+  {
+    path: "/login",
     exact: true,
     icon: homeIcon,
     title: 'Chirpbird',

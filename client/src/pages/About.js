@@ -9,7 +9,7 @@ export default function About() {
             <div className="txt-header ds-pb-5">Tentang Kami</div>
             <div className="txt-subheader"></div>
             <div className="ds-border form-container ds-p-3">
-                Kami adalah Kanemu
+                Kami adalah Kamu
                 <ContactInfo />
             </div>
         </div>   

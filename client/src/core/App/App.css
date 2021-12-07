@@ -118,11 +118,13 @@
 }
 
 .icon-bg {
+  background-color: transparent;
   background-color: var(--secondary-background);
   border-radius: 50%;
   height: 28px;
   width: 28px;
   padding: 6px;
+  cursor: pointer;
 }
 
 .icon-bg:hover {

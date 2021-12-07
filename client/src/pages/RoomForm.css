@@ -1,0 +1,7 @@
+.removable {
+    cursor: pointer;
+}
+
+.removable:hover {
+    font-size: 13pt;
+}
