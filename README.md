@@ -1,5 +1,24 @@
 # ChirpBird
 
+Our target is to build chatting-version of OmeTv 😸, so there's so much thing to be done.
+Additional Docs is in /docs folder and database indices is in migration/migration.sh
+so far it's just support 
+- register with no login feature
+- username unique check
+- create group and find friends by username
+- chat with them
+
+# to be done : 
+- fix front end UI/UX
+- testing stuff
+- continous deployment
+- support server-client/end-to-end encryption
+- support join and left group
+- support on type and on message read
+- support search and recommendation chat rooms by interest
+- support random rooms
+- support private rooms
+
 # start with docker
 - docker build . -t chirpbird
 - docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.15.2
@@ -9,7 +28,14 @@
 - docker run -p 3000:80 chirpbird-client
 
 # start with docker-compose
-- docker-compose up
+- docker-compose up 
+(notes: golang server (978879/chirpbird978879 will keep restart until the elasticsearch ready, wait ready not build yet))
+
+# tech stack :
+- front end with ReactJS
+- back end with Golang and simple package
+- db with Elasticsearch 😸, it's initial plan is to sync PostgreSQL and Elasticsearch with tools like
+Logstash, but it will require so much time so it's only use Elastic lol (though it's not fit for every data entity), also Redis PubSub is still not used yet
 
 
 Welcome to Haraj take home challenge!
