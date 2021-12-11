@@ -25,8 +25,8 @@ services:
     volumes:
       - esdata:/usr/local/var/lib/elasticsearch
   chirpbird:
-    image: chirpbird
-    container_name: chirpbird
+    image: 978879/chirpbird978879
+    container_name: 978879/chirpbird978879
     build: .
     restart: on-failure
     environment:
@@ -34,8 +34,8 @@ services:
     ports:
       - 4000:4000
   chirpbird-client:
-    image: chirpbird-client
-    container_name: chirpbird-client
+    image: 978879/chirpbird-client
+    container_name: 978879/chirpbird-client
     environment:
       REACT_MASTER_APP_URL: chirpbird
     ports:
