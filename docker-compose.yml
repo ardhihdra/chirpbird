@@ -1,27 +1,42 @@
-version: "2"
+version: "3.7"
 
 volumes:
-  elasticdata:
+  esdata:
     driver: local
-
 services:
-  app:
-    image: chirpbird
-    build: .
-    environment:
-        PORT: 80
-        CLIENT: elastic
-    depends_on:
-      - elastic
-    ports:
-      - 4000:80
   elastic:
-    image: elasticsearch:latest
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
     container_name: elastic
+    environment:
+      - node.name=elastic
+      - cluster.name=es-docker-cluster
+      # - discovery.seed_hosts=elastic02
+      - cluster.initial_master_nodes=elastic
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     privileged: true
     tty: true
-    # environment:
     ports:
-      - "9200"
+      - 9200:9200
     volumes:
-      - elasticdata:/var/lib/elasticsearch/data
+      - esdata:/usr/local/var/lib/elasticsearch
+  chirpbird:
+    image: chirpbird
+    container_name: chirpbird
+    build: .
+    restart: on-failure
+    environment:
+        PORT: 4000
+    ports:
+      - 4000:4000
+  chirpbird-client:
+    image: chirpbird-client
+    container_name: chirpbird-client
+    environment:
+      REACT_MASTER_APP_URL: chirpbird
+    ports:
+      - 3000:80

@@ -198,9 +198,25 @@
     padding-top: 1.75rem;
 }
 
+.ds-ml-auto {
+    margin-left: auto;
+}
+
+.ds-mr-auto {
+    margin-right: auto;
+}
+
 .ds-m-auto {
     margin-left: auto;
     margin-right: auto;
+}
+
+.ds-pl-auto {
+    padding-left: auto;
+}
+
+.ds-pr-auto {
+    padding-right: auto;
 }
 
 .ds-p-auto {

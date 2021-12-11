@@ -1,4 +1,4 @@
-import Login from "../../pages/login/Login.jsx";
+import Login from "../../pages/Login/Login.jsx";
 import Dashboard from "../../pages/Dashboard.jsx";
 import About from "../../pages/About";
 

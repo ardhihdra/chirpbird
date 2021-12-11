@@ -24,24 +24,18 @@ type User struct {
 	UpdatedAt int64    `json:"updated_at"`
 }
 
-func (u *User) UsernameAvailable() bool {
-	// res, _ := datastore.DB.Users.Find(bson.M{"username": strings.ToLower(u.Username)}).Count()
-	var users []User
+var oneday int64 = 1000 * 60 * 60 * 6
+var Expiry = helper.Timestamp() - oneday
 
-	var oneday int64 = 1000 * 60 * 60 * 24
-	expiry := helper.Timestamp() - oneday
+func (u *User) UsernameAvailable() bool {
+	var users []User
+	expiry := Expiry
+
 	_, err := deleteExpiredUser(expiry)
 	if err != nil {
 		fmt.Println("error find avail username")
 		return false
 	}
-	// query := map[string]interface{}{
-	// 	"query": map[string]interface{}{
-	// 		"match": map[string]interface{}{
-	// 			"username": strings.ToLower(u.Username),
-	// 		},
-	// 	},
-	// }
 	query := db.MatchFilterCondition(
 		map[string]interface{}{"username": strings.ToLower(u.Username)},
 		map[string]interface{}{
@@ -50,12 +44,6 @@ func (u *User) UsernameAvailable() bool {
 			}},
 	)
 	err = FindAll(query, db.IdxUsers, &users)
-	// for idx := range users {
-	// 	if helper.SliceContains(existedIDs, users[idx].ID) {
-	// 		users[idx] = users[len(users)-1]
-	// 		users = users[:len(users)-1]
-	// 	}
-	// }
 	if err != nil {
 		fmt.Println("error find avail username")
 		return false
@@ -101,13 +89,7 @@ func (u *User) EmailAvailable() bool {
 }
 
 func (u *User) GetByID() {
-	query := map[string]interface{}{
-		"query": map[string]interface{}{
-			"match": map[string]interface{}{
-				"_id": u.ID,
-			},
-		},
-	}
+	query := db.MatchCondition(map[string]interface{}{"id": u.ID})
 	err := FindOne(query, db.IdxUsers, &u)
 	if err != nil {
 		fmt.Println("error find avail email")

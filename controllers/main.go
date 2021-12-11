@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -15,14 +16,14 @@ type BaseController struct {
 func (c *BaseController) Authenticate(r *http.Request) (err error) {
 	token, err := jwt.Parse(r)
 	if err != nil {
-		return
+		return errors.New("failed to parse token")
 	}
-	u, err := users.ByID(token.UserID)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	user, err := users.CheckExpiry(token.UserID)
 
-	c.User = u
+	if err != nil || user == nil {
+		fmt.Println(err)
+		return errors.New("Unauthenticate")
+	}
+	c.User = user
 	return nil
 }

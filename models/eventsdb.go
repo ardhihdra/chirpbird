@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strings"
 
@@ -11,8 +12,8 @@ import (
 
 type EventDB struct {
 	ID        string    `json:"id"`
-	Type      EventType `json:"type"`
-	ObjectID  string    `json:"object_id"`
+	Type      EventType `json:"type,string"`
+	MessageID string    `json:"message_id"`
 	UserIDs   []string  `json:"user_ids"`
 	Timestamp int64     `json:"timestamp"`
 }
@@ -29,17 +30,25 @@ func (events) GetByUserIDAndTimestamp(ID string, ts int64) ([]*EventDB, error) {
 	)
 	values, err := db.FindAll(query, db.IdxEvents)
 	if err != nil {
-		return nil, err
+		return ev, err
 	}
-
-	return ev, json.Unmarshal([]byte(values[1].String()), &ev)
+	arrVal := values[1].Array()
+	for i := range arrVal {
+		var evd EventDB
+		if err = json.Unmarshal([]byte(arrVal[i].Get("_source").String()), &evd); err != nil {
+			fmt.Println("err", err)
+			return ev, err
+		}
+		ev = append(ev, &evd)
+	}
+	return ev, nil
 }
 
-func (events) Create(typ EventType, objectID string, clientIDs []string, ts int64) (*EventDB, error) {
+func (events) Create(typ EventType, messageID string, clientIDs []string, ts int64) (*EventDB, error) {
 	e := &EventDB{
 		ID:        uuid.NewV4().String(),
 		Type:      typ,
-		ObjectID:  objectID,
+		MessageID: messageID,
 		UserIDs:   clientIDs,
 		Timestamp: ts,
 	}
@@ -63,9 +72,9 @@ func (events) Create(typ EventType, objectID string, clientIDs []string, ts int6
 	return e, nil
 }
 
-func (events) DeleteOldEvents(objectID string, typ EventType, ts int64) {
+func (events) DeleteOldEvents(messageID string, typ EventType, ts int64) {
 	query := db.MatchFilterCondition(
-		map[string]interface{}{"object_id": objectID, "type": typ},
+		map[string]interface{}{"message_id": messageID, "type": typ},
 		map[string]interface{}{"timestamp": map[string]interface{}{"lt": ts}},
 	)
 	values, err := db.FindAll(query, db.IdxEvents)
@@ -73,7 +82,14 @@ func (events) DeleteOldEvents(objectID string, typ EventType, ts int64) {
 		return
 	}
 	var toBeDeleted []*EventDB
-	json.Unmarshal([]byte(values[1].String()), &toBeDeleted)
+	arrVal := values[1].Array()
+	var tbd EventDB
+	for i := range arrVal {
+		if err = json.Unmarshal([]byte(arrVal[i].Get("_source").String()), &tbd); err != nil {
+			return
+		}
+		toBeDeleted = append(toBeDeleted, &tbd)
+	}
 	for idx := range toBeDeleted {
 		db.Elastic.Delete(db.IdxEvents, toBeDeleted[idx].ID)
 	}

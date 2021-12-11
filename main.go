@@ -34,7 +34,7 @@ func main() {
 	mux.HandleFunc("/groups/:id/left", groups.Left())
 
 	/** API for Infos */
-	mux.HandleFunc("/users", users.GetUserInfo())
+	mux.HandleFunc("/users", users.GetUsers())
 	mux.HandleFunc("/username", users.CheckUniqueUsername())
 	mux.HandleFunc("/dashboard", groups.DashboardData())
 	mux.HandleFunc("/rooms", groups.RoomsData())
@@ -62,5 +62,8 @@ func loadEnv() {
 	CLIENT = os.Getenv("CLIENT")
 	if PORT == "" {
 		PORT = "4000"
+	}
+	if CLIENT == "" {
+		CLIENT = "*"
 	}
 }

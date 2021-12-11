@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 )
 
 type Message struct {
-	ID        string `json:"_id"`
+	ID        string `json:"id"`
 	UserID    string `json:"user_id"`
 	GroupID   string `json:"group_id"`
 	Body      Body   `json:"body"`
@@ -27,16 +28,15 @@ type messages struct{}
 var Messages = new(messages)
 
 func (messages) ByID(ID string) (*Message, error) {
-	var m *Message
-	query := map[string]interface{}{
-		"_id": ID,
-	}
-	values, err := db.FindOne(query, db.IdxEvents)
+	var m Message
+	query := db.MatchCondition(map[string]interface{}{"id": ID})
+	values, err := db.FindOne(query, db.IdxMessages)
 	if err != nil {
+		fmt.Println("err", err)
 		return nil, err
 	}
 
-	return m, json.Unmarshal([]byte(values[1].String()), &m)
+	return &m, json.Unmarshal([]byte(values[1].String()), &m)
 }
 
 func (messages) Create(groupID, userID, data string, ts int64) (*Message, error) {
@@ -51,7 +51,7 @@ func (messages) Create(groupID, userID, data string, ts int64) (*Message, error)
 
 	marshaled, _ := json.Marshal(m)
 	res, err := db.Elastic.Index(
-		db.IdxUsers,                           // Index name
+		db.IdxMessages,                        // Index name
 		strings.NewReader(string(marshaled)),  // Document body
 		db.Elastic.Index.WithDocumentID(m.ID), // Document ID
 		db.Elastic.Index.WithRefresh("true"),  // Refresh

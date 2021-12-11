@@ -37,6 +37,9 @@ func Create(userID string) string {
 }
 
 func Parse(r *http.Request) (*JWTToken, error) {
+	if r.Method != http.MethodPost {
+		return nil, errors.New("Only accept POST method")
+	}
 	tokenStr := getTokenString(r)
 	if tokenStr == "" {
 		return nil, errors.New("jwt token invalid")
@@ -49,7 +52,7 @@ func Parse(r *http.Request) (*JWTToken, error) {
 	}
 
 	if token.Method.Alg() != alg {
-		return nil, errors.New("alg wrong")
+		return nil, errors.New("wrong alg")
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {

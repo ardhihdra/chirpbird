@@ -19,11 +19,13 @@ func (m *messages) Send(c *datautils.UserConnection, p *datautils.RpcMessageSend
 	e := models.NewMessage(msg)
 	e.SaveForUsers(msg.ID, group.UserIDs)
 
-	es := models.NewMessageSent(msg.ID, e.Timestamp)
+	es := models.NewMessageSent(msg, e.Timestamp)
 	es.SaveForUser(msg.ID, group.UserID)
-	es.SendToUser(group.UserID)
 
-	e.SendToUsersWithoutMe(c.SessionID, group.UserIDs)
+	// e.SendToUsersWithoutMe(c.SessionID, group.UserIDs)
+	e.SendToUsers(group.UserIDs)
+	/** notify sent */
+	es.SendToUser(group.UserID)
 }
 
 func (m *messages) Read(c *datautils.UserConnection, p *datautils.RpcMessageRead) {
@@ -50,7 +52,7 @@ func (m *messages) Delivered(c *datautils.UserConnection, p *datautils.RpcMessag
 	if group == nil {
 		return
 	}
-	e := models.NewMessageDelivered(msg.ID, helper.Timestamp())
+	e := models.NewMessageDelivered(msg, helper.Timestamp())
 	e.SaveForUser(msg.ID, msg.UserID)
 	e.SendToUsersWithoutMe(c.SessionID, []string{msg.UserID, c.UserID})
 	e.DeleteOldEvents(msg.ID)

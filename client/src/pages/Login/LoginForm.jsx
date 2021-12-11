@@ -6,16 +6,10 @@ import Input from '../../components/Input'
 import tele from '../../assets/img/icons/telegram.png';
 import mail from '../../assets/img/icons/009-message.png';
 /** thanks to https://gist.github.com/keeguon/2310008 */
-import countries from "./countries"
+import countries from "../../assets/js/countries"
+import interests from "../../assets/js/interests"
 const MASTER_URL = `http://${process.env.REACT_APP_MASTER_URL}`
-const INTERESTS = [
-    {id: 1, name: 'just bored', tag: 'social'},
-    {id: 2, name: 'programming', tag: 'technology'},
-    {id: 3, name: 'science', tag: 'technology'},
-    {id: 4, name: 'music', tag: 'art'},
-    {id: 5, name: 'art', tag: 'art'},
-    {id: 6, name: 'politic', tag: 'social'},
-]
+const INTERESTS = interests
 
 function WithNavigate(props) {
     let navigate = useNavigate();
@@ -89,13 +83,13 @@ class LoginForm extends React.Component {
         }).then(async response => {
             if(response instanceof Error) throw response
             localStorage.setItem('userinfo', JSON.stringify(response.data.data));
-            localStorage.setItem('token', response.data.token);
+            sessionStorage.setItem('token', response.data.token);
 
             const config = {
                 headers: { 'Authorization': 'Bearer ' + response.data.token }
             }
             const resp = await axios.post(`${MASTER_URL}/sessions`, {}, config)
-            localStorage.setItem('access_token', JSON.stringify(resp.data.access_token));
+            sessionStorage.setItem('access_token', resp.data.access_token);
             this.props.navigate(`/`)
         }).catch((error) => {
             alert('Login failed', error)
@@ -224,10 +218,10 @@ class LoginForm extends React.Component {
                     <Input name="username" value={this.state.username} 
                         placeholder="Username, How people will address you?" 
                         onChange={this.handleChange} required={true}/>
-                    <select id="country">
+                    <select id="country" name="country" value={this.state.country} onChange={this.handleChange}>
                         { countryList.map((ctr, idx) => {
                             return (
-                                <option className="ds-option" key={idx} onChange={this.handleChange} value={ctr.name}>{ctr.name}</option>
+                                <option className="ds-option" key={idx} value={ctr.name}>{ctr.name}</option>
                                 )
                             })}
                     </select>

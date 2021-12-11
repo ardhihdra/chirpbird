@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/ardhihdra/chirpbird/datautils"
@@ -93,14 +94,20 @@ func (h *usersHandler) PasswordValid(u *datautils.User) error {
 	return nil
 }
 
-func (h *usersHandler) ByUsername(username string) (*datautils.User, error) {
-	var u *datautils.User
-	query := db.MatchCondition(map[string]interface{}{
-		"username":        strings.ToLower(username),
-		"_source":         true,
-		"terminate_after": 1,
-	})
-	return u, datautils.FindOne(query, db.IdxUsers, &u)
+func (h *usersHandler) ByUsername(username string, exactmatch bool) (*[]datautils.User, error) {
+	var u []datautils.User
+	var query map[string]interface{}
+	if exactmatch {
+		query = db.MatchCondition(map[string]interface{}{
+			"username": strings.ToLower(username),
+		})
+	} else {
+		query = db.QueryString(map[string]interface{}{
+			"fields": []string{"username"},
+			"query":  fmt.Sprintf("*%s*", username),
+		})
+	}
+	return &u, datautils.FindAll(query, db.IdxUsers, &u)
 }
 
 func (h *usersHandler) ByEmail(email string) (*datautils.User, error) {
@@ -111,7 +118,7 @@ func (h *usersHandler) ByEmail(email string) (*datautils.User, error) {
 
 func (h *usersHandler) ByID(ID string) (*datautils.User, error) {
 	var u *datautils.User
-	query := db.MatchCondition(map[string]interface{}{"_id": strings.ToLower(ID)})
+	query := db.MatchCondition(map[string]interface{}{"id": strings.ToLower(ID)})
 	return u, datautils.FindOne(query, db.IdxUsers, &u)
 }
 
@@ -120,4 +127,16 @@ func (h *usersHandler) Auth(userPassword, password string) bool {
 		return false
 	}
 	return true
+}
+
+func (h *usersHandler) CheckExpiry(id string) (*datautils.User, error) {
+	var u *datautils.User
+	query := db.MatchFilterCondition(
+		map[string]interface{}{"id": id},
+		map[string]interface{}{
+			"created_at": map[string]int64{
+				"gt": datautils.Expiry,
+			}},
+	)
+	return u, datautils.FindOne(query, db.IdxUsers, &u)
 }

@@ -1,0 +1,6 @@
+.left-menu-toolbox {
+    background-color: var(--secondary-background);
+    padding: 5px;
+    margin: 10px;
+    border-radius: var(--border-radius-norm);
+}

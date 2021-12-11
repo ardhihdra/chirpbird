@@ -1,5 +1,17 @@
 # ChirpBird
 
+# start with docker
+- docker build . -t chirpbird
+- docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+- sh migration.sh
+- docker run -p 4000:4000 -e ES_HOST="172.17.0.1" chirpbird // where ES_HOST is the es container ip
+- cd client && docker build . -t chirpbird-client
+- docker run -p 3000:80 chirpbird-client
+
+# start with docker-compose
+- docker-compose up
+
+
 Welcome to Haraj take home challenge!
 
 In this challenge you will be assigned to help fictional startup called `ChirpBird` to create their instant messaging platform. Basically they want to create platform similar like [Facebook Messenger](https://www.messenger.com/), [WhatsApp](https://www.whatsapp.com/), or [Telegram](https://telegram.org/).

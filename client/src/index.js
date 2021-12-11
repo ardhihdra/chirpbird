@@ -6,7 +6,17 @@ import reportWebVitals from './reportWebVitals';
 import * as dotenv from 'dotenv'
 import * as dotenvExpand from 'dotenv-expand'
 
+global.MASTER_URL = `http://${process.env.REACT_APP_MASTER_URL}`
+
 dotenvExpand(dotenv.config())
+
+// to do
+// axios.interceptors.request.use(function (config) {
+//   const token = sessionStorage.getItem('token')
+//   config.headers.Authorization = 'Bearer ' + token;
+
+//   return config;
+// });
 
 ReactDOM.render(
   <React.StrictMode>

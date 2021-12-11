@@ -19,16 +19,15 @@ export default function RightMenu(props) {
         if(resp instanceof Error) throw resp
         // must not comeback, remove session, refersh indices
         localStorage.removeItem('userinfo')
-        localStorage.removeItem('token')
-        localStorage.removeItem('access_token')
+        localStorage.removeItem('messaging_url')
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('access_token')
         navigate(`/login`)
     }
 
     return (
         <div className="right-menu ds-border ds-flex-column">
-            <div className="right-menu-list">Right Menu</div>
-            <div className="right-menu-list">Right Menu</div>
-            <div className="right-menu-list">Right Menu</div>
+            <div className="right-menu-list">Hello, {userinfo.username}!</div>
             <div className="right-menu-footer ds-m-3">
                 <Icon img={logoutImg} onClick={logout}/>
             </div>

@@ -24,6 +24,7 @@ func init() {
 }
 
 func publishListener() {
+	fmt.Println("listener initiated")
 	db.Redis.Subscribe(func(channel string, data []byte) {
 		chunks := strings.Split(channel, ":")
 		sessionID := chunks[len(chunks)-1]
@@ -90,20 +91,25 @@ func rpcReader(c *datautils.UserConnection, mCh chan *datautils.RPC, aCh chan *d
 
 	for {
 		mtype, data, err := c.Connection.ReadMessage()
-		if err != nil {
-			fmt.Println("Error: ", err.Error())
+		if mtype == -1 || err != nil {
+			fmt.Println("ws ReadMessage Error: ", err.Error())
+			continue
 		}
 		if mtype == 0 {
-			fmt.Println("Error: Invalid socket data")
+			fmt.Println("ws Error: Invalid socket data")
+			continue
 		}
 		rpc := &datautils.RPC{}
 		if err := json.Unmarshal(data, rpc); err != nil {
-			fmt.Println("Error: ", err.Error())
+			fmt.Println("ws Unmarshal Error: ", err.Error())
 		}
 		isActChan := rpc.Method == datautils.RPC_TYPING_START || rpc.Method == datautils.RPC_TYPING_END
+		isMsgChan := rpc.Method == datautils.RPC_MESSAGE_GET || rpc.Method == datautils.RPC_MESSAGE_SEND ||
+			rpc.Method == datautils.RPC_MESSAGE_READ || rpc.Method == datautils.RPC_MESSAGE_DELIVERED
+
 		if isActChan {
 			aCh <- rpc
-		} else {
+		} else if isMsgChan {
 			mCh <- rpc
 		}
 	}
@@ -116,36 +122,47 @@ func HandleMessaging(c *datautils.UserConnection, r *datautils.RPC) {
 			fmt.Println("Error while parse ws message", r.Body, err)
 		}
 	}
-
 	switch r.Method {
 	case datautils.RPC_MESSAGE_GET:
+		// fmt.Println("RPC_MESSAGE_GET")
 		params := datautils.RpcMessageGet{}
 		parseMsg(&params)
+		fmt.Println(params)
 		eventsService.Get(c, &params)
 
 	case datautils.RPC_MESSAGE_SEND:
+		// fmt.Println("RPC_MESSAGE_SEND")
 		params := datautils.RpcMessageSend{}
 		parseMsg(&params)
+		fmt.Println(params)
 		messageService.Send(c, &params)
 
 	case datautils.RPC_MESSAGE_DELIVERED:
+		// fmt.Println("RPC_MESSAGE_DELIVERED")
 		params := datautils.RpcMessageDelivered{}
 		parseMsg(&params)
+		fmt.Println(params)
 		messageService.Delivered(c, &params)
 
 	case datautils.RPC_MESSAGE_READ:
+		// fmt.Println("RPC_MESSAGE_READ")
 		params := datautils.RpcMessageRead{}
 		parseMsg(&params)
+		fmt.Println(params)
 		messageService.Read(c, &params)
 
 	case datautils.RPC_TYPING_START:
+		// fmt.Println("RPC_TYPING_START")
 		params := datautils.RpcTypingStart{}
 		parseMsg(&params)
+		fmt.Println(params)
 		typingService.Start(c, &params)
 
 	case datautils.RPC_TYPING_END:
+		// fmt.Println("RPC_TYPING_END")
 		params := datautils.RpcTypingEnd{}
 		parseMsg(&params)
+		fmt.Println(params)
 		typingService.End(c, &params)
 	}
 }

@@ -17,6 +17,7 @@ func newEvents() *Events {
 func (e *Events) Get(c *datautils.UserConnection, p *datautils.RpcMessageGet) {
 	es, err := models.Events.GetByUserIDAndTimestamp(c.UserID, p.Timestamp)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	for _, event := range es {
@@ -34,19 +35,19 @@ func (e *Events) Get(c *datautils.UserConnection, p *datautils.RpcMessageGet) {
 func (e *Events) createMessagePayload(event *models.EventDB) (*models.Event, error) {
 	switch event.Type {
 	case models.EVENT_MESSAGE:
-		return e.messagePayload(event.ObjectID)
+		return e.messagePayload(event.MessageID)
 	case models.EVENT_MESSAGE_SENT:
-		return e.messagePayloadSent(event.ObjectID, event.Timestamp)
+		return e.messagePayloadSent(event.MessageID, event.Timestamp)
 	case models.EVENT_MESSAGE_DELIVERED:
-		return e.messagePayloadDelivered(event.ObjectID, event.Timestamp)
+		return e.messagePayloadDelivered(event.MessageID, event.Timestamp)
 	case models.EVENT_MESSAGE_READ:
-		return e.messagePayloadRead(event.ObjectID, event.Timestamp)
+		return e.messagePayloadRead(event.MessageID, event.Timestamp)
 	case models.EVENT_GROUP:
-		return e.messagePayloadGroup(event.ObjectID)
+		return e.messagePayloadGroup(event.MessageID)
 	case models.EVENT_GROUP_JOINED:
-		return e.messagePayloadGroupJoined(event.ObjectID)
+		return e.messagePayloadGroupJoined(event.MessageID)
 	case models.EVENT_GROUP_LEFT:
-		return e.messagePayloadGroupLeft(event.ObjectID)
+		return e.messagePayloadGroupLeft(event.MessageID)
 	}
 
 	return nil, errors.New("wrong event type")
@@ -65,7 +66,7 @@ func (e *Events) messagePayloadSent(messageID string, ts int64) (*models.Event, 
 	if err != nil {
 		return nil, err
 	}
-	return models.NewMessageSent(m.ID, ts), nil
+	return models.NewMessageSent(m, ts), nil
 }
 
 func (e *Events) messagePayloadDelivered(messageID string, ts int64) (*models.Event, error) {
@@ -73,7 +74,7 @@ func (e *Events) messagePayloadDelivered(messageID string, ts int64) (*models.Ev
 	if err != nil {
 		return nil, err
 	}
-	return models.NewMessageDelivered(m.ID, ts), nil
+	return models.NewMessageDelivered(m, ts), nil
 }
 
 func (e *Events) messagePayloadRead(messageID string, ts int64) (*models.Event, error) {
@@ -85,7 +86,7 @@ func (e *Events) messagePayloadRead(messageID string, ts int64) (*models.Event, 
 }
 
 func (e *Events) messagePayloadGroup(groupID string) (*models.Event, error) {
-	g, err := models.Groups.ByID(groupID)
+	g, err := models.Groups.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +94,7 @@ func (e *Events) messagePayloadGroup(groupID string) (*models.Event, error) {
 }
 
 func (e *Events) messagePayloadGroupJoined(groupID string) (*models.Event, error) {
-	g, err := models.Groups.ByID(groupID)
+	g, err := models.Groups.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +102,7 @@ func (e *Events) messagePayloadGroupJoined(groupID string) (*models.Event, error
 }
 
 func (e *Events) messagePayloadGroupLeft(groupID string) (*models.Event, error) {
-	g, err := models.Groups.ByID(groupID)
+	g, err := models.Groups.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ export default class Input extends React.Component {
         super(props);
         this.state = {value: props.value}
         this.handleChangeParent = this.props.onChange
+        this.handleKeyUp = this.props.onKeyUp
     }
        
     handleChange = (e) => {
@@ -49,7 +50,7 @@ export default class Input extends React.Component {
                 { type !== 'textarea' ? 
                     <input className={divClass} name={name} type={type} value={value} 
                         min={min} max={max} style={type === 'number' ? style.smallinput: {}}
-                        placeholder={placeholder} onChange={this.handleChange} required={required}/>
+                        placeholder={placeholder} onChange={this.handleChange} onKeyUp={this.handleKeyUp} required={required}/>
                 :
                     <textarea className="ds-p-2 ds-mt-4" name={name} type={type} value={value} 
                     min={min} max={max} style={type === 'number' ? style.smallinput: {}}

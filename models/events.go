@@ -2,10 +2,12 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/ardhihdra/chirpbird/datautils"
-	"github.com/ardhihdra/chirpbird/db"
+	"github.com/gorilla/websocket"
 )
 
 type EventType int
@@ -25,17 +27,23 @@ const (
 	EVENT_GROUP_LEFT   EventType = 73
 )
 
+/** list of Body type, Payload of the websocket message */
 type EventMessage struct {
-	MessageID string `json:"message_id,omitempty"`
-	Data      string `json:"data,omitempty"`
+	MessageID  string `json:"message_id,omitempty"`
+	Data       string `json:"data,omitempty"`
+	GroupID    string `json:"group_id,omitempty"`
+	SenderID   string `json:"sender_id,omitempty"`
+	SenderName string `json:"sender_name,omitempty"`
 }
 
 type EventMessageSent struct {
 	MessageID string `json:"message_id,omitempty"`
+	GroupID   string `json:"group_id,omitempty"`
 }
 
 type EventMessageDelivered struct {
 	MessageID string `json:"message_id,omitempty"`
+	GroupID   string `json:"group_id,omitempty"`
 }
 
 type EventTypingStart struct {
@@ -112,20 +120,27 @@ func (e *Event) SendEvent(c *datautils.UserConnection) error {
 		log.Fatalf("ERROR: %s", err)
 		return err
 	}
-	db.Redis.Publish(c.UserID, data)
+	// db.Redis.Publish(c.UserID, data)
+	conn, err := datautils.ConnectionBySessionID(c.UserID)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	conn.SetWriteDeadline(time.Now().Add(datautils.WriteWait))
+	conn.WriteMessage(websocket.TextMessage, data)
 	return nil
 }
 
-func (e *Event) SaveForUser(objectID, userID string) {
-	e.SaveForUsers(objectID, []string{userID})
+func (e *Event) SaveForUser(messageID, userID string) {
+	e.SaveForUsers(messageID, []string{userID})
 }
 
-func (e *Event) SaveForUsers(objectID string, userIDs []string) {
-	Events.Create(e.Type, objectID, userIDs, e.Timestamp)
+func (e *Event) SaveForUsers(messageID string, userIDs []string) {
+	Events.Create(e.Type, messageID, userIDs, e.Timestamp)
 }
 
-func (e *Event) DeleteOldEvents(objectID string) {
-	Events.DeleteOldEvents(objectID, e.Type, e.Timestamp)
+func (e *Event) DeleteOldEvents(messageID string) {
+	Events.DeleteOldEvents(messageID, e.Type, e.Timestamp)
 }
 
 func NewGroup(g *Group) *Event {
@@ -158,25 +173,32 @@ func NewGroupLeft(g *Group) *Event {
 
 func NewMessage(m *Message) *Event {
 	event := NewEvent(EVENT_MESSAGE, m.CreatedAt)
+	user := &datautils.User{ID: m.UserID}
+	user.GetByID()
 	event.Body = EventMessage{
-		MessageID: m.ID,
-		Data:      m.Body.Data,
+		MessageID:  m.ID,
+		Data:       m.Body.Data,
+		GroupID:    m.GroupID,
+		SenderID:   m.UserID,
+		SenderName: user.Username,
 	}
 	return event
 }
 
-func NewMessageSent(messageID string, ts int64) *Event {
+func NewMessageSent(msg *Message, ts int64) *Event {
 	event := NewEvent(EVENT_MESSAGE_SENT, ts)
 	event.Body = EventMessageSent{
-		MessageID: messageID,
+		MessageID: msg.ID,
+		GroupID:   msg.GroupID,
 	}
 	return event
 }
 
-func NewMessageDelivered(messageID string, ts int64) *Event {
+func NewMessageDelivered(msg *Message, ts int64) *Event {
 	event := NewEvent(EVENT_MESSAGE_DELIVERED, ts)
 	event.Body = EventMessageDelivered{
-		MessageID: messageID,
+		MessageID: msg.ID,
+		GroupID:   msg.GroupID,
 	}
 	return event
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ardhihdra/chirpbird/db"
+	"github.com/tidwall/gjson"
 )
 
 type Session struct {
@@ -70,11 +71,25 @@ func GetSessionByUserID(userID string) ([]*Session, error) {
 	query := db.MatchCondition(map[string]interface{}{
 		"user_id": userID,
 	})
-	var ses []*Session
+	var sessions []*Session
 	values, err := db.FindAll(query, db.IdxSessions)
-	if err != nil {
-		return ses, err
+	arrVal := values[1].Array()
+	var ses Session
+	for i := range arrVal {
+		json.Unmarshal([]byte(arrVal[i].Get("_source").String()), &ses)
+		sessions = append(sessions, &ses)
 	}
-	json.Unmarshal([]byte(values[1].String()), &ses)
-	return ses, nil
+	if err != nil {
+		return sessions, err
+	}
+	return sessions, nil
+}
+
+func trial(values []gjson.Result, target []*interface{}) {
+	arrVal := values[1].Array()
+	var usr interface{}
+	for i := range arrVal {
+		json.Unmarshal([]byte(arrVal[i].Get("_source").String()), &usr)
+		target = append(target, &usr)
+	}
 }
