@@ -24,8 +24,9 @@ var Events = new(events)
 
 func (events) GetByUserIDAndTimestamp(ID string, ts int64) ([]*EventDB, error) {
 	var ev []*EventDB
+	var i_id interface{} = ID
 	query := db.MatchFilterCondition(
-		map[string]interface{}{"user_ids": ID},
+		map[string]interface{}{"user_ids": i_id},
 		map[string]interface{}{"timestamp": map[string]interface{}{"gt": ts}},
 	)
 	values, err := db.FindAll(query, db.IdxEvents)
@@ -73,8 +74,9 @@ func (events) Create(typ EventType, messageID string, clientIDs []string, ts int
 }
 
 func (events) DeleteOldEvents(messageID string, typ EventType, ts int64) {
+	var i_messageID interface{} = messageID
 	query := db.MatchFilterCondition(
-		map[string]interface{}{"message_id": messageID, "type": typ},
+		map[string]interface{}{"message_id": i_messageID, "type": typ},
 		map[string]interface{}{"timestamp": map[string]interface{}{"lt": ts}},
 	)
 	values, err := db.FindAll(query, db.IdxEvents)

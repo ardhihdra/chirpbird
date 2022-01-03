@@ -131,8 +131,9 @@ func (h *usersHandler) Auth(userPassword, password string) bool {
 
 func (h *usersHandler) CheckExpiry(id string) (*datautils.User, error) {
 	var u *datautils.User
+	var i_id interface{} = id
 	query := db.MatchFilterCondition(
-		map[string]interface{}{"id": id},
+		map[string]interface{}{"id": i_id},
 		map[string]interface{}{
 			"created_at": map[string]int64{
 				"gt": datautils.Expiry,

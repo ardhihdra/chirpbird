@@ -1,8 +1,9 @@
-module github.com/ardhihdra/chirpbird
+module github.com/ardhihdra/chirpbird/app
 
 go 1.17
 
 require (
+	github.com/ardhihdra/chirpbird v0.0.0-20211211144220-acf611f78e22
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/elastic/go-elasticsearch/v8 v8.0.0-20211123103400-5f8a17a2322f
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -17,8 +18,6 @@ require (
 )
 
 require (
-	github.com/myesui/uuid v1.0.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect
 )

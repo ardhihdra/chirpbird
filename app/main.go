@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/ardhihdra/chirpbird/controllers"
-	"github.com/ardhihdra/chirpbird/messaging"
+	"github.com/ardhihdra/chirpbird/app/controllers"
+	"github.com/ardhihdra/chirpbird/app/messaging"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )

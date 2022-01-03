@@ -16,13 +16,14 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+const IdxMessaging string = "messaging"
 const (
-	IdxEvents          string = "events"
-	IdxMessages        string = "messages"
-	IdxGroups          string = "groups"
-	IdxUsers           string = "users"
-	IdxSessions        string = "sessions"
-	IdxUserConnections string = "userconnections"
+	TypeEvents          string = "events"
+	TypeMessages        string = "messages"
+	TypeGroups          string = "groups"
+	TypeUsers           string = "users"
+	TypeSessions        string = "sessions"
+	TypeUserConnections string = "userconnections"
 )
 
 var (
@@ -103,14 +104,15 @@ func createElasticsearchClient() (*elasticsearch.Client, error) {
 	return client, err
 }
 
-func ExecuteQuery(query map[string]interface{}, index string, b *bytes.Buffer) error {
+func ExecuteQuery(query map[string]interface{}, dtype string, b *bytes.Buffer) error {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		log.Fatalf("Error encoding: %s", err)
 		return err
 	}
 	searchRes, err := Elastic.Search(
-		Elastic.Search.WithIndex(index),
+		Elastic.Search.WithIndex(IdxMessaging),
+		Elastic.Search.WithSearchType(dtype),
 		Elastic.Search.WithBody(&buf),
 		Elastic.Search.WithPretty(),
 	)

@@ -1,3 +1,16 @@
+# MESSAGING 
+curl -X PUT "localhost:9200/messaging?pretty" -H 'Content-Type: application/json' -d'
+{
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "_source": {
+      "enabled": true
+    }
+  }
+}'
+
 # USERS
 curl -X PUT "localhost:9200/users?pretty" -H 'Content-Type: application/json' -d'
 {

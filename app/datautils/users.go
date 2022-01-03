@@ -36,14 +36,16 @@ func (u *User) UsernameAvailable() bool {
 		fmt.Println("error find avail username")
 		return false
 	}
+	// string to interface
+	var uname interface{} = strings.ToLower(u.Username)
 	query := db.MatchFilterCondition(
-		map[string]interface{}{"username": strings.ToLower(u.Username)},
+		map[string]interface{}{"username": uname},
 		map[string]interface{}{
 			"created_at": map[string]int64{
 				"gt": expiry,
 			}},
 	)
-	err = FindAll(query, db.IdxUsers, &users)
+	err = FindAll(query, db.TypeUsers, &users)
 	if err != nil {
 		fmt.Println("error find avail username")
 		return false
@@ -63,7 +65,7 @@ func deleteExpiredUser(expiry int64) ([]string, error) {
 			},
 		},
 	}
-	err := FindAll(queryDel, db.IdxUsers, listDel)
+	err := FindAll(queryDel, db.TypeUsers, listDel)
 	if err != nil {
 		fmt.Println("error find avail username")
 		return nil, err
@@ -71,7 +73,7 @@ func deleteExpiredUser(expiry int64) ([]string, error) {
 	var existedIDs []string
 	for idx := range *listDel {
 		existedIDs = append(existedIDs, (*listDel)[idx].ID)
-		db.Elastic.Delete(db.IdxUsers, (*listDel)[idx].ID)
+		db.Elastic.Delete(db.TypeUsers, (*listDel)[idx].ID)
 	}
 	return existedIDs, nil
 }
@@ -81,7 +83,7 @@ func (u *User) EmailAvailable() bool {
 		"email": strings.ToLower(u.Email),
 	}
 	var users []User
-	err := FindAll(query, db.IdxUsers, &users)
+	err := FindAll(query, db.TypeUsers, &users)
 	if err != nil {
 		fmt.Println("error find avail email")
 	}
@@ -90,14 +92,14 @@ func (u *User) EmailAvailable() bool {
 
 func (u *User) GetByID() {
 	query := db.MatchCondition(map[string]interface{}{"id": u.ID})
-	err := FindOne(query, db.IdxUsers, &u)
+	err := FindOne(query, db.TypeUsers, &u)
 	if err != nil {
 		fmt.Println("error find avail email")
 	}
 }
 
 func (u *User) DeleteByID() {
-	db.Elastic.Delete(db.IdxUsers, u.ID)
+	db.Elastic.Delete(db.TypeUsers, u.ID)
 }
 
 func FindOne(query map[string]interface{}, index string, usr **User) error {
@@ -126,10 +128,11 @@ func FindAll(query map[string]interface{}, index string, usrs *[]User) error {
 func (u *User) CreateUser() error {
 	userMarshal, _ := json.Marshal(u)
 	res, err := db.Elastic.Index(
-		db.IdxUsers,                            // Index name
-		strings.NewReader(string(userMarshal)), // Document body
-		db.Elastic.Index.WithDocumentID(u.ID),  // Document ID
-		db.Elastic.Index.WithRefresh("true"),   // Refresh
+		db.IdxMessaging,
+		strings.NewReader(string(userMarshal)),    // Document body
+		db.Elastic.Index.WithOpType(db.TypeUsers), // Index name
+		db.Elastic.Index.WithDocumentID(u.ID),     // Document ID
+		db.Elastic.Index.WithRefresh("true"),      // Refresh
 	)
 	if err != nil {
 		log.Fatalf("ERROR: %s", err)
