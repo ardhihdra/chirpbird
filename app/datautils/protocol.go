@@ -20,7 +20,7 @@ const (
  */
 type RPC struct {
 	Method RpcMethod   `json:"method"`
-	Body   interface{} `json:"body,omitempty`
+	Body   interface{} `json:"body,omitempty"`
 }
 
 type RpcMessageGet struct {

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ardhihdra/chirpbird/datautils"
-	"github.com/ardhihdra/chirpbird/db"
-	"github.com/ardhihdra/chirpbird/models"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/db"
+	"github.com/ardhihdra/chirpbird/app/models"
 	"github.com/gorilla/websocket"
 )
 
@@ -167,7 +167,7 @@ func HandleMessaging(c *datautils.UserConnection, r *datautils.RPC) {
 	}
 }
 
-func withGroup(groupID, userID string) *models.Group {
+func withGroup(groupID, userID string) *datautils.Group {
 	g, err := models.Groups.ByIDAndUserID(groupID, userID)
 	if err != nil {
 		return nil

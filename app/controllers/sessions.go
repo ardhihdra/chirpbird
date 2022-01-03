@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ardhihdra/chirpbird/models"
+	"github.com/ardhihdra/chirpbird/app/models"
 )
 
 type SessionsController struct {

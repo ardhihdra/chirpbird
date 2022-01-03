@@ -16,4 +16,4 @@ ENV PORT 4000
 
 RUN go build
 
-CMD ["./chirpbird"]
+CMD ["./app"]

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ardhihdra/chirpbird/datautils"
-	"github.com/ardhihdra/chirpbird/models"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/models"
 )
 
 type Events struct{}
@@ -32,79 +32,79 @@ func (e *Events) Get(c *datautils.UserConnection, p *datautils.RpcMessageGet) {
 	}
 }
 
-func (e *Events) createMessagePayload(event *models.EventDB) (*models.Event, error) {
+func (e *Events) createMessagePayload(event *models.EventDB) (*datautils.Event, error) {
 	switch event.Type {
-	case models.EVENT_MESSAGE:
+	case datautils.EVENT_MESSAGE:
 		return e.messagePayload(event.MessageID)
-	case models.EVENT_MESSAGE_SENT:
+	case datautils.EVENT_MESSAGE_SENT:
 		return e.messagePayloadSent(event.MessageID, event.Timestamp)
-	case models.EVENT_MESSAGE_DELIVERED:
+	case datautils.EVENT_MESSAGE_DELIVERED:
 		return e.messagePayloadDelivered(event.MessageID, event.Timestamp)
-	case models.EVENT_MESSAGE_READ:
+	case datautils.EVENT_MESSAGE_READ:
 		return e.messagePayloadRead(event.MessageID, event.Timestamp)
-	case models.EVENT_GROUP:
+	case datautils.EVENT_GROUP:
 		return e.messagePayloadGroup(event.MessageID)
-	case models.EVENT_GROUP_JOINED:
+	case datautils.EVENT_GROUP_JOINED:
 		return e.messagePayloadGroupJoined(event.MessageID)
-	case models.EVENT_GROUP_LEFT:
+	case datautils.EVENT_GROUP_LEFT:
 		return e.messagePayloadGroupLeft(event.MessageID)
 	}
 
 	return nil, errors.New("wrong event type")
 }
 
-func (e *Events) messagePayload(messageID string) (*models.Event, error) {
+func (e *Events) messagePayload(messageID string) (*datautils.Event, error) {
 	m, err := models.Messages.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
-	return models.NewMessage(m), nil
+	return datautils.NewMessage(m), nil
 }
 
-func (e *Events) messagePayloadSent(messageID string, ts int64) (*models.Event, error) {
+func (e *Events) messagePayloadSent(messageID string, ts int64) (*datautils.Event, error) {
 	m, err := models.Messages.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
-	return models.NewMessageSent(m, ts), nil
+	return datautils.NewMessageSent(m, ts), nil
 }
 
-func (e *Events) messagePayloadDelivered(messageID string, ts int64) (*models.Event, error) {
+func (e *Events) messagePayloadDelivered(messageID string, ts int64) (*datautils.Event, error) {
 	m, err := models.Messages.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
-	return models.NewMessageDelivered(m, ts), nil
+	return datautils.NewMessageDelivered(m, ts), nil
 }
 
-func (e *Events) messagePayloadRead(messageID string, ts int64) (*models.Event, error) {
+func (e *Events) messagePayloadRead(messageID string, ts int64) (*datautils.Event, error) {
 	m, err := models.Messages.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
-	return models.NewMessageRead(m.ID, ts), nil
+	return datautils.NewMessageRead(m.ID, ts), nil
 }
 
-func (e *Events) messagePayloadGroup(groupID string) (*models.Event, error) {
+func (e *Events) messagePayloadGroup(groupID string) (*datautils.Event, error) {
 	g, err := models.Groups.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
-	return models.NewGroup(g), nil
+	return datautils.NewGroup(g), nil
 }
 
-func (e *Events) messagePayloadGroupJoined(groupID string) (*models.Event, error) {
+func (e *Events) messagePayloadGroupJoined(groupID string) (*datautils.Event, error) {
 	g, err := models.Groups.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
-	return models.NewGroupJoined(g), nil
+	return datautils.NewGroupJoined(g), nil
 }
 
-func (e *Events) messagePayloadGroupLeft(groupID string) (*models.Event, error) {
+func (e *Events) messagePayloadGroupLeft(groupID string) (*datautils.Event, error) {
 	g, err := models.Groups.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
-	return models.NewGroupLeft(g), nil
+	return datautils.NewGroupLeft(g), nil
 }

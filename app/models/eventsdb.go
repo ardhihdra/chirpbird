@@ -6,16 +6,17 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ardhihdra/chirpbird/db"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/db"
 	"github.com/twinj/uuid"
 )
 
 type EventDB struct {
-	ID        string    `json:"id"`
-	Type      EventType `json:"type,string"`
-	MessageID string    `json:"message_id"`
-	UserIDs   []string  `json:"user_ids"`
-	Timestamp int64     `json:"timestamp"`
+	ID        string              `json:"id"`
+	Type      datautils.EventType `json:"type,string"`
+	MessageID string              `json:"message_id"`
+	UserIDs   []string            `json:"user_ids"`
+	Timestamp int64               `json:"timestamp"`
 }
 
 type events struct{}
@@ -29,7 +30,7 @@ func (events) GetByUserIDAndTimestamp(ID string, ts int64) ([]*EventDB, error) {
 		map[string]interface{}{"user_ids": i_id},
 		map[string]interface{}{"timestamp": map[string]interface{}{"gt": ts}},
 	)
-	values, err := db.FindAll(query, db.IdxEvents)
+	values, err := db.FindAll(query, db.IdxMessaging)
 	if err != nil {
 		return ev, err
 	}
@@ -45,7 +46,7 @@ func (events) GetByUserIDAndTimestamp(ID string, ts int64) ([]*EventDB, error) {
 	return ev, nil
 }
 
-func (events) Create(typ EventType, messageID string, clientIDs []string, ts int64) (*EventDB, error) {
+func (events) CreateEvent(typ datautils.EventType, messageID string, clientIDs []string, ts int64) (*EventDB, error) {
 	e := &EventDB{
 		ID:        uuid.NewV4().String(),
 		Type:      typ,
@@ -55,7 +56,7 @@ func (events) Create(typ EventType, messageID string, clientIDs []string, ts int
 	}
 	eMarshal, _ := json.Marshal(e)
 	res, err := db.Elastic.Index(
-		db.IdxEvents,                          // Index name
+		db.IdxMessaging,                       // Index name
 		strings.NewReader(string(eMarshal)),   // Document body
 		db.Elastic.Index.WithDocumentID(e.ID), // Document ID
 		db.Elastic.Index.WithRefresh("true"),  // Refresh
@@ -73,13 +74,13 @@ func (events) Create(typ EventType, messageID string, clientIDs []string, ts int
 	return e, nil
 }
 
-func (events) DeleteOldEvents(messageID string, typ EventType, ts int64) {
+func (events) DeleteOldEvents(messageID string, typ datautils.EventType, ts int64) {
 	var i_messageID interface{} = messageID
 	query := db.MatchFilterCondition(
 		map[string]interface{}{"message_id": i_messageID, "type": typ},
 		map[string]interface{}{"timestamp": map[string]interface{}{"lt": ts}},
 	)
-	values, err := db.FindAll(query, db.IdxEvents)
+	values, err := db.FindAll(query, db.IdxMessaging)
 	if err != nil {
 		return
 	}
@@ -93,6 +94,14 @@ func (events) DeleteOldEvents(messageID string, typ EventType, ts int64) {
 		toBeDeleted = append(toBeDeleted, &tbd)
 	}
 	for idx := range toBeDeleted {
-		db.Elastic.Delete(db.IdxEvents, toBeDeleted[idx].ID)
+		db.Elastic.Delete(db.IdxMessaging, toBeDeleted[idx].ID)
 	}
+}
+
+func (events) SaveForUser(messageID, userID string, e *datautils.Event) {
+	Events.SaveForUsers(messageID, []string{userID}, e)
+}
+
+func (events) SaveForUsers(messageID string, userIDs []string, e *datautils.Event) {
+	Events.CreateEvent(e.Type, messageID, userIDs, e.Timestamp)
 }

@@ -5,8 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ardhihdra/chirpbird/db"
-	"github.com/tidwall/gjson"
+	"github.com/ardhihdra/chirpbird/app/db"
 )
 
 type Session struct {
@@ -28,7 +27,7 @@ type Session struct {
 func (s *Session) CreateSession() error {
 	sesMarshal, _ := json.Marshal(s)
 	res, err := db.Elastic.Index(
-		db.IdxSessions,                        // Index name
+		db.IdxMessaging,                       // Index name
 		strings.NewReader(string(sesMarshal)), // Document body
 		db.Elastic.Index.WithDocumentID(s.ID), // Document ID
 		db.Elastic.Index.WithRefresh("true"),  // Refresh
@@ -51,7 +50,7 @@ func (s *Session) CreateSession() error {
 // }
 
 func (s *Session) DeleteByID() {
-	db.Elastic.Delete(db.IdxSessions, s.ID)
+	db.Elastic.Delete(db.IdxMessaging, s.ID)
 }
 
 func GetSessionByAccessToken(access_token string) (Session, error) {
@@ -59,7 +58,7 @@ func GetSessionByAccessToken(access_token string) (Session, error) {
 		"access_token": access_token,
 	})
 	var ses Session
-	values, err := db.FindOne(query, db.IdxSessions)
+	values, err := db.FindOne(query, db.IdxMessaging)
 	if err != nil {
 		return ses, err
 	}
@@ -72,7 +71,7 @@ func GetSessionByUserID(userID string) ([]*Session, error) {
 		"user_id": userID,
 	})
 	var sessions []*Session
-	values, err := db.FindAll(query, db.IdxSessions)
+	values, err := db.FindAll(query, db.IdxMessaging)
 	arrVal := values[1].Array()
 	var ses Session
 	for i := range arrVal {
@@ -85,11 +84,11 @@ func GetSessionByUserID(userID string) ([]*Session, error) {
 	return sessions, nil
 }
 
-func trial(values []gjson.Result, target []*interface{}) {
-	arrVal := values[1].Array()
-	var usr interface{}
-	for i := range arrVal {
-		json.Unmarshal([]byte(arrVal[i].Get("_source").String()), &usr)
-		target = append(target, &usr)
-	}
-}
+// func trial(values []gjson.Result, target []*interface{}) {
+// 	arrVal := values[1].Array()
+// 	var usr interface{}
+// 	for i := range arrVal {
+// 		json.Unmarshal([]byte(arrVal[i].Get("_source").String()), &usr)
+// 		target = append(target, &usr)
+// 	}
+// }

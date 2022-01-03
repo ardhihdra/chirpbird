@@ -91,4 +91,4 @@ So feel free to take your time.
 
 ## Questions
 
-Got any questions? Feel free to open [issues](https://github.com/riandyrn/chirpbird/issues).
+Got any questions? Feel free to open [issues](https://github.com/riandyrn/chirpbird/app/issues).

@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ardhihdra/chirpbird/datautils"
-	"github.com/ardhihdra/chirpbird/helper/jwt"
-	"github.com/ardhihdra/chirpbird/models"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/helper/jwt"
+	"github.com/ardhihdra/chirpbird/app/models"
 )
 
 type UsersController struct {
@@ -153,8 +153,6 @@ func saveLogin(username, country, profile string, interests []string) (*datautil
 	)
 
 	if username != "" {
-
-	} else if username != "" {
 		usr, err = users.ByEmail(username)
 		if err != nil {
 			return nil, err

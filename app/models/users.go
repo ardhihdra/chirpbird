@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ardhihdra/chirpbird/datautils"
-	"github.com/ardhihdra/chirpbird/db"
-	"github.com/ardhihdra/chirpbird/helper"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/db"
+	"github.com/ardhihdra/chirpbird/app/helper"
 	"github.com/asaskevich/govalidator"
 	"github.com/twinj/uuid"
 
@@ -107,19 +107,19 @@ func (h *usersHandler) ByUsername(username string, exactmatch bool) (*[]datautil
 			"query":  fmt.Sprintf("*%s*", username),
 		})
 	}
-	return &u, datautils.FindAll(query, db.IdxUsers, &u)
+	return &u, datautils.FindAll(query, db.IdxMessaging, &u)
 }
 
 func (h *usersHandler) ByEmail(email string) (*datautils.User, error) {
 	var u *datautils.User
 	query := db.MatchCondition(map[string]interface{}{"email": strings.ToLower(email)})
-	return u, datautils.FindOne(query, db.IdxUsers, &u)
+	return u, datautils.FindOne(query, db.IdxMessaging, &u)
 }
 
 func (h *usersHandler) ByID(ID string) (*datautils.User, error) {
 	var u *datautils.User
 	query := db.MatchCondition(map[string]interface{}{"id": strings.ToLower(ID)})
-	return u, datautils.FindOne(query, db.IdxUsers, &u)
+	return u, datautils.FindOne(query, db.IdxMessaging, &u)
 }
 
 func (h *usersHandler) Auth(userPassword, password string) bool {
@@ -139,5 +139,5 @@ func (h *usersHandler) CheckExpiry(id string) (*datautils.User, error) {
 				"gt": datautils.Expiry,
 			}},
 	)
-	return u, datautils.FindOne(query, db.IdxUsers, &u)
+	return u, datautils.FindOne(query, db.IdxMessaging, &u)
 }

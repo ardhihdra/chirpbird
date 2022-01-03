@@ -26,24 +26,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// mux.HandleFunc("/login", users.Login())
-	mux.HandleFunc("/register", users.Register())
-	mux.HandleFunc("/logout", users.Logout())
-	mux.HandleFunc("/groups", groups.Create())
-	mux.HandleFunc("/groups/:id/join", groups.Join())
-	mux.HandleFunc("/groups/:id/left", groups.Left())
-
-	/** API for Infos */
-	mux.HandleFunc("/users", users.GetUsers())
-	mux.HandleFunc("/username", users.CheckUniqueUsername())
-	mux.HandleFunc("/dashboard", groups.DashboardData())
-	mux.HandleFunc("/rooms", groups.RoomsData())
-	mux.HandleFunc("/search", groups.SearchStuff())
-
-	// SESSIONS RESOURCE
-	mux.HandleFunc("/sessions", sessions.Create())
-	// MESSAGING RESOURCE
-	mux.HandleFunc("/messaging", messaging.Start())
+	initRoute(mux)
 
 	// allowedHeaders := []string{"Accept", "User-Agent", "Content-Type", "Content-Length", "Accept-Encoding", "Authorization", "X-CSRF-Token", "Origin"}
 	allowedHeaders := []string{"Accept", "Content-Type", "Origin", "*"}
@@ -66,4 +49,25 @@ func loadEnv() {
 	if CLIENT == "" {
 		CLIENT = "*"
 	}
+}
+
+func initRoute(mux *http.ServeMux) {
+	// mux.HandleFunc("/login", users.Login())
+	mux.HandleFunc("/register", users.Register())
+	mux.HandleFunc("/logout", users.Logout())
+	mux.HandleFunc("/groups", groups.Create())
+	mux.HandleFunc("/groups/:id/join", groups.Join())
+	mux.HandleFunc("/groups/:id/left", groups.Left())
+
+	/** API for Infos */
+	mux.HandleFunc("/users", users.GetUsers())
+	mux.HandleFunc("/username", users.CheckUniqueUsername())
+	mux.HandleFunc("/dashboard", groups.DashboardData())
+	mux.HandleFunc("/rooms", groups.RoomsData())
+	mux.HandleFunc("/search", groups.SearchStuff())
+
+	// SESSIONS RESOURCE
+	mux.HandleFunc("/sessions", sessions.Create())
+	// MESSAGING RESOURCE
+	mux.HandleFunc("/messaging", messaging.Start())
 }

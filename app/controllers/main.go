@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ardhihdra/chirpbird/datautils"
-	"github.com/ardhihdra/chirpbird/helper/jwt"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/helper/jwt"
 )
 
 type BaseController struct {

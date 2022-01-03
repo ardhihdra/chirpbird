@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/ardhihdra/chirpbird/datautils"
-	"github.com/ardhihdra/chirpbird/helper"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/helper"
 	"github.com/twinj/uuid"
 )
 

@@ -7,8 +7,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ardhihdra/chirpbird/db"
-	"github.com/ardhihdra/chirpbird/helper"
+	"github.com/ardhihdra/chirpbird/app/db"
+	"github.com/ardhihdra/chirpbird/app/helper"
 	"github.com/tidwall/gjson"
 )
 

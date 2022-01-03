@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ardhihdra/chirpbird/models"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/models"
 )
 
 type GroupsController struct {
@@ -36,8 +37,8 @@ func (gc *GroupsController) Create() http.HandlerFunc {
 				return
 			}
 			/** announce new group */
-			if eg := models.NewGroup(g); eg != nil {
-				eg.SaveForUsers(g.ID, g.UserIDs)
+			if eg := datautils.NewGroup(g); eg != nil {
+				models.Events.SaveForUsers(g.ID, g.UserIDs, eg)
 				eg.SendToUsers(g.UserIDs)
 			}
 			w.WriteHeader(http.StatusCreated)
@@ -89,7 +90,7 @@ func (gc *GroupsController) RoomsData() http.HandlerFunc {
 			id := r.URL.Query().Get("id")
 			name := r.URL.Query().Get("name")
 			user_id := r.URL.Query().Get("user_id")
-			var us []models.Group
+			var us []datautils.Group
 			if id != "" {
 				group, err := models.Groups.GetByID(id)
 				if err != nil {

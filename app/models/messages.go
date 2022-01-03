@@ -6,31 +6,19 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ardhihdra/chirpbird/db"
+	"github.com/ardhihdra/chirpbird/app/datautils"
+	"github.com/ardhihdra/chirpbird/app/db"
 	"github.com/twinj/uuid"
 )
-
-type Message struct {
-	ID        string `json:"id"`
-	UserID    string `json:"user_id"`
-	GroupID   string `json:"group_id"`
-	Body      Body   `json:"body"`
-	CreatedAt int64  `json:"created_at"`
-	UpdatedAt int64  `json:"updated_at"`
-}
-
-type Body struct {
-	Data string `json:"data"`
-}
 
 type messages struct{}
 
 var Messages = new(messages)
 
-func (messages) ByID(ID string) (*Message, error) {
-	var m Message
+func (messages) ByID(ID string) (*datautils.Message, error) {
+	var m datautils.Message
 	query := db.MatchCondition(map[string]interface{}{"id": ID})
-	values, err := db.FindOne(query, db.IdxMessages)
+	values, err := db.FindOne(query, db.IdxMessaging)
 	if err != nil {
 		fmt.Println("err", err)
 		return nil, err
@@ -39,19 +27,19 @@ func (messages) ByID(ID string) (*Message, error) {
 	return &m, json.Unmarshal([]byte(values[1].String()), &m)
 }
 
-func (messages) Create(groupID, userID, data string, ts int64) (*Message, error) {
-	m := &Message{
+func (messages) Create(groupID, userID, data string, ts int64) (*datautils.Message, error) {
+	m := &datautils.Message{
 		ID:        uuid.NewV4().String(),
 		UserID:    userID,
 		GroupID:   groupID,
-		Body:      Body{Data: data},
+		Body:      datautils.Body{Data: data},
 		CreatedAt: ts,
 		UpdatedAt: ts,
 	}
 
 	marshaled, _ := json.Marshal(m)
 	res, err := db.Elastic.Index(
-		db.IdxMessages,                        // Index name
+		db.IdxMessaging,                       // Index name
 		strings.NewReader(string(marshaled)),  // Document body
 		db.Elastic.Index.WithDocumentID(m.ID), // Document ID
 		db.Elastic.Index.WithRefresh("true"),  // Refresh
