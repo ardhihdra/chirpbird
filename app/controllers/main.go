@@ -18,7 +18,7 @@ func (c *BaseController) Authenticate(r *http.Request) (err error) {
 	if err != nil {
 		return errors.New("failed to parse token")
 	}
-	user, err := users.CheckExpiry(token.UserID)
+	user, err := userModel.CheckExpiry(token.UserID)
 
 	if err != nil || user == nil {
 		fmt.Println(err)

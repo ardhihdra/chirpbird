@@ -13,13 +13,23 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var eventsService = newEvents()
-var messageService = newMessages()
-var typingService = newTyping()
+var (
+	eventsService  *Events
+	messageService *messages
+	typingService  *typing
+	groupModel     models.GroupModel
+	userModel      models.UserModel
+	messageModel   models.MessageModel
+	sessionModel   models.SessionModel
+)
 
-var sessions = models.NewSessionsHandler()
-
-func init() {
+func NewMessagingService(userM models.UserModel, groupM models.GroupModel, sessionM models.SessionModel, messageM models.MessageModel) {
+	eventsService = newEvents()
+	messageService = newMessages()
+	typingService = newTyping()
+	userModel = userM
+	groupModel = groupM
+	sessionModel = sessionM
 	go publishListener()
 }
 
@@ -41,7 +51,7 @@ func Start() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			access_token := r.URL.Query().Get("access_token")
-			s, err := sessions.GetByAccessToken(access_token)
+			s, err := sessionModel.GetByAccessToken(access_token)
 			if err != nil {
 				fmt.Println("Error: Unauthorized, wrong token or expired")
 			}
@@ -93,7 +103,7 @@ func rpcReader(c *datautils.UserConnection, mCh chan *datautils.RPC, aCh chan *d
 		mtype, data, err := c.Connection.ReadMessage()
 		if mtype == -1 || err != nil {
 			fmt.Println("ws ReadMessage Error: ", err.Error())
-			continue
+			break
 		}
 		if mtype == 0 {
 			fmt.Println("ws Error: Invalid socket data")
@@ -102,6 +112,7 @@ func rpcReader(c *datautils.UserConnection, mCh chan *datautils.RPC, aCh chan *d
 		rpc := &datautils.RPC{}
 		if err := json.Unmarshal(data, rpc); err != nil {
 			fmt.Println("ws Unmarshal Error: ", err.Error())
+			continue
 		}
 		isActChan := rpc.Method == datautils.RPC_TYPING_START || rpc.Method == datautils.RPC_TYPING_END
 		isMsgChan := rpc.Method == datautils.RPC_MESSAGE_GET || rpc.Method == datautils.RPC_MESSAGE_SEND ||
@@ -127,7 +138,6 @@ func HandleMessaging(c *datautils.UserConnection, r *datautils.RPC) {
 		// fmt.Println("RPC_MESSAGE_GET")
 		params := datautils.RpcMessageGet{}
 		parseMsg(&params)
-		fmt.Println(params)
 		eventsService.Get(c, &params)
 
 	case datautils.RPC_MESSAGE_SEND:
@@ -168,7 +178,7 @@ func HandleMessaging(c *datautils.UserConnection, r *datautils.RPC) {
 }
 
 func withGroup(groupID, userID string) *datautils.Group {
-	g, err := models.Groups.ByIDAndUserID(groupID, userID)
+	g, err := groupModel.ByIDAndUserID(groupID, userID)
 	if err != nil {
 		return nil
 	}

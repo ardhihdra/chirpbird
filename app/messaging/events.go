@@ -54,15 +54,16 @@ func (e *Events) createMessagePayload(event *models.EventDB) (*datautils.Event, 
 }
 
 func (e *Events) messagePayload(messageID string) (*datautils.Event, error) {
-	m, err := models.Messages.ByID(messageID)
+	m, err := messageModel.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
-	return datautils.NewMessage(m), nil
+	user, _ := userModel.ByID(m.UserID)
+	return datautils.NewMessage(m, user), nil
 }
 
 func (e *Events) messagePayloadSent(messageID string, ts int64) (*datautils.Event, error) {
-	m, err := models.Messages.ByID(messageID)
+	m, err := messageModel.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func (e *Events) messagePayloadSent(messageID string, ts int64) (*datautils.Even
 }
 
 func (e *Events) messagePayloadDelivered(messageID string, ts int64) (*datautils.Event, error) {
-	m, err := models.Messages.ByID(messageID)
+	m, err := messageModel.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func (e *Events) messagePayloadDelivered(messageID string, ts int64) (*datautils
 }
 
 func (e *Events) messagePayloadRead(messageID string, ts int64) (*datautils.Event, error) {
-	m, err := models.Messages.ByID(messageID)
+	m, err := messageModel.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func (e *Events) messagePayloadRead(messageID string, ts int64) (*datautils.Even
 }
 
 func (e *Events) messagePayloadGroup(groupID string) (*datautils.Event, error) {
-	g, err := models.Groups.GetByID(groupID)
+	g, err := groupModel.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +95,7 @@ func (e *Events) messagePayloadGroup(groupID string) (*datautils.Event, error) {
 }
 
 func (e *Events) messagePayloadGroupJoined(groupID string) (*datautils.Event, error) {
-	g, err := models.Groups.GetByID(groupID)
+	g, err := groupModel.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +103,7 @@ func (e *Events) messagePayloadGroupJoined(groupID string) (*datautils.Event, er
 }
 
 func (e *Events) messagePayloadGroupLeft(groupID string) (*datautils.Event, error) {
-	g, err := models.Groups.GetByID(groupID)
+	g, err := groupModel.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}

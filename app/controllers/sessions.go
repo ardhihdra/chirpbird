@@ -9,17 +9,21 @@ import (
 	"github.com/ardhihdra/chirpbird/app/models"
 )
 
-type SessionsController struct {
+type SessionsController interface {
+	Create() http.HandlerFunc
+}
+type sessionsController struct {
 	BaseController
 }
 
-func NewSessionsController() *SessionsController {
-	return &SessionsController{}
+var sessionModel models.SessionModel
+
+func NewSessionsController(model models.SessionModel) SessionsController {
+	sessionModel = model
+	return &sessionsController{}
 }
 
-var sessionsHandler = models.NewSessionsHandler()
-
-func (sc *SessionsController) Create() http.HandlerFunc {
+func (sc *sessionsController) Create() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPost {
@@ -39,7 +43,7 @@ func (sc *SessionsController) Create() http.HandlerFunc {
 			platform := userag[1]
 			build, _ := strconv.Atoi(r.FormValue("build"))
 			name := r.FormValue("name")
-			s, err := sessionsHandler.Create(sc.User.ID, deviceID, platform, build, name)
+			s, err := sessionModel.Create(sc.User.ID, deviceID, platform, build, name)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -52,7 +56,6 @@ func (sc *SessionsController) Create() http.HandlerFunc {
 				// "messaging_url": s.MessagingURL(),
 				"created_at": s.CreatedAt,
 			})
-
 		},
 	)
 }

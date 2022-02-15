@@ -9,15 +9,26 @@ import (
 	"github.com/ardhihdra/chirpbird/app/models"
 )
 
-type GroupsController struct {
+type GroupsController interface {
+	Create() http.HandlerFunc
+	Join() http.HandlerFunc
+	Left() http.HandlerFunc
+	DashboardData() http.HandlerFunc
+	RoomsData() http.HandlerFunc
+	SearchStuff() http.HandlerFunc
+}
+type groupsController struct {
 	BaseController
 }
 
-func NewGroupController() *GroupsController {
-	return &GroupsController{}
+var groupModel models.GroupModel
+
+func NewGroupController(model models.GroupModel) GroupsController {
+	groupModel = model
+	return &groupsController{}
 }
 
-func (gc *GroupsController) Create() http.HandlerFunc {
+func (gc *groupsController) Create() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if err := gc.Authenticate(r); err != nil {
@@ -30,7 +41,7 @@ func (gc *GroupsController) Create() http.HandlerFunc {
 			groupName := r.FormValue("name")
 			groupMember := strings.Split(r.FormValue("user_ids"), ",")
 			groupMember = append(groupMember, gc.User.ID)
-			g, err := models.Groups.Create(groupName, gc.User.ID, groupMember)
+			g, err := groupModel.Create(groupName, gc.User.ID, groupMember)
 			if err != nil {
 				w.WriteHeader(http.StatusBadGateway)
 				json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
@@ -47,7 +58,7 @@ func (gc *GroupsController) Create() http.HandlerFunc {
 	)
 }
 
-func (gc *GroupsController) Join() http.HandlerFunc {
+func (gc *groupsController) Join() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPut {
@@ -60,7 +71,7 @@ func (gc *GroupsController) Join() http.HandlerFunc {
 	)
 }
 
-func (gc *GroupsController) Left() http.HandlerFunc {
+func (gc *groupsController) Left() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPut {
@@ -73,7 +84,7 @@ func (gc *GroupsController) Left() http.HandlerFunc {
 	)
 }
 
-func (gc *GroupsController) DashboardData() http.HandlerFunc {
+func (gc *groupsController) DashboardData() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			// GET all users, users by interests, users by country,
@@ -82,7 +93,7 @@ func (gc *GroupsController) DashboardData() http.HandlerFunc {
 		})
 }
 
-func (gc *GroupsController) RoomsData() http.HandlerFunc {
+func (gc *groupsController) RoomsData() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			// GET room detail
@@ -92,7 +103,7 @@ func (gc *GroupsController) RoomsData() http.HandlerFunc {
 			user_id := r.URL.Query().Get("user_id")
 			var us []datautils.Group
 			if id != "" {
-				group, err := models.Groups.GetByID(id)
+				group, err := groupModel.GetByID(id)
 				if err != nil {
 					w.WriteHeader(http.StatusBadGateway)
 					json.NewEncoder(w).Encode(map[string]string{"error": "err while get users"})
@@ -100,7 +111,7 @@ func (gc *GroupsController) RoomsData() http.HandlerFunc {
 				us = append(us, *group)
 			} else if name != "" {
 				// find username like
-				group, err := models.Groups.ByName(name, false)
+				group, err := groupModel.ByName(name, false)
 				us = *group
 				if err != nil {
 					w.WriteHeader(http.StatusBadGateway)
@@ -108,7 +119,7 @@ func (gc *GroupsController) RoomsData() http.HandlerFunc {
 				}
 			} else if user_id != "" {
 				// find username like
-				group, err := models.Groups.ByUserIDs(user_id)
+				group, err := groupModel.ByUserIDs(user_id)
 				us = *group
 				if err != nil {
 					w.WriteHeader(http.StatusBadGateway)
@@ -123,7 +134,7 @@ func (gc *GroupsController) RoomsData() http.HandlerFunc {
 		})
 }
 
-func (gc *GroupsController) SearchStuff() http.HandlerFunc {
+func (gc *groupsController) SearchStuff() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			// GET search by name, profile,

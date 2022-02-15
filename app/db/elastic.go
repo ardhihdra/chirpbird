@@ -16,18 +16,18 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-const IdxMessaging string = "messaging"
 const (
-	TypeEvents          string = "events"
-	TypeMessages        string = "messages"
-	TypeGroups          string = "groups"
-	TypeUsers           string = "users"
-	TypeSessions        string = "sessions"
-	TypeUserConnections string = "userconnections"
+	IdxEvents          string = "events"
+	IdxMessages        string = "messages"
+	IdxGroups          string = "groups"
+	IdxUsers           string = "users"
+	IdxSessions        string = "sessions"
+	IdxUserConnections string = "userconnections"
 )
 
 var (
-	ES_HOST   string
+	listIndex = []string{IdxEvents, IdxMessages, IdxGroups, IdxUsers, IdxSessions, IdxUserConnections}
+	ES_HOSTS  string
 	ES_PORT   string
 	esAddress string
 	Elastic   *elasticsearch.Client
@@ -40,20 +40,17 @@ type RawReturn struct {
 
 func loadEnv() {
 	godotenv.Load()
-	ES_HOST = os.Getenv("ES_HOST")
-	ES_PORT = os.Getenv("ES_PORT")
-	if ES_HOST == "" {
-		ES_HOST = "http://localhost"
+	ES_HOSTS = os.Getenv("ES_HOSTS")
+	// ES_PORT = os.Getenv("ES_PORT")
+	if ES_HOSTS == "" {
+		ES_HOSTS = "http://localhost:9200"
 	}
-	if ES_PORT == "" {
-		ES_PORT = "9200"
-	}
+	// if ES_PORT == "" {
+	// 	ES_PORT = "9200"
+	// }
 }
 
 func Migrate() string {
-	// absPath, _ := filepath.Abs("./")
-	// query := fmt.Sprintf("%s/%s", absPath, "migration/migration.sh")
-	/** local migration might be wont work */
 	query := InitQuery(strings.Split(esAddress, ",")[0])
 	cmd, err := exec.Command("/bin/sh", "-c", query).Output()
 	if err != nil {
@@ -62,6 +59,31 @@ func Migrate() string {
 	output := string(cmd)
 	fmt.Println(output)
 	return output
+}
+
+func initIndex() {
+	fmt.Println("Initiating Index")
+	for i := range listIndex {
+		res, err := Elastic.Cat.Indices(
+			Elastic.Cat.Indices.WithIndex(listIndex[i]),
+		)
+		if err != nil || res.IsError() {
+			res, err := Elastic.Index(
+				listIndex[i],
+				strings.NewReader("{}"),
+			)
+			if err != nil {
+				log.Fatalf("ERROR: %s", err)
+			}
+			defer res.Body.Close()
+			if res.IsError() {
+				PrintErrorResponse(res)
+			}
+			fmt.Println("Index created: ", listIndex[i])
+		} else {
+			fmt.Println("Index already exist: ", listIndex[i])
+		}
+	}
 }
 
 func init() {
@@ -73,7 +95,7 @@ func init() {
 	Elastic = esClient
 
 	var r map[string]interface{}
-	fmt.Println("ES Client created", Elastic, ES_HOST, ES_PORT)
+	fmt.Println("ES Client created", Elastic, ES_HOSTS, ES_PORT)
 	// 1. Get cluster info
 	clusterInfo, err := Elastic.Info()
 	if err != nil {
@@ -88,12 +110,12 @@ func init() {
 	log.Printf("Server: %s", r["version"].(map[string]interface{})["number"])
 	log.Println(strings.Repeat("~", 37))
 
-	fmt.Println("Initiating Index")
-	Migrate()
+	// Migrate()
+	initIndex()
 }
 
 func createElasticsearchClient() (*elasticsearch.Client, error) {
-	adresses := fmt.Sprintf("http://elastic:9200,http://%s:%s", ES_HOST, ES_PORT)
+	adresses := fmt.Sprintf("%v", ES_HOSTS)
 	flag.StringVar(&esAddress, "es-addresses", adresses, "elasticsearch addresses")
 	cfg := elasticsearch.Config{
 		Addresses: strings.Split(esAddress, ","),
@@ -104,15 +126,14 @@ func createElasticsearchClient() (*elasticsearch.Client, error) {
 	return client, err
 }
 
-func ExecuteQuery(query map[string]interface{}, dtype string, b *bytes.Buffer) error {
+func ExecuteQuery(query map[string]interface{}, index string, b *bytes.Buffer) error {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		log.Fatalf("Error encoding: %s", err)
 		return err
 	}
 	searchRes, err := Elastic.Search(
-		Elastic.Search.WithIndex(IdxMessaging),
-		Elastic.Search.WithSearchType(dtype),
+		Elastic.Search.WithIndex(index),
 		Elastic.Search.WithBody(&buf),
 		Elastic.Search.WithPretty(),
 	)

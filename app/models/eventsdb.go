@@ -30,7 +30,7 @@ func (events) GetByUserIDAndTimestamp(ID string, ts int64) ([]*EventDB, error) {
 		map[string]interface{}{"user_ids": i_id},
 		map[string]interface{}{"timestamp": map[string]interface{}{"gt": ts}},
 	)
-	values, err := db.FindAll(query, db.IdxMessaging)
+	values, err := db.FindAll(query, db.IdxEvents)
 	if err != nil {
 		return ev, err
 	}
@@ -56,7 +56,7 @@ func (events) CreateEvent(typ datautils.EventType, messageID string, clientIDs [
 	}
 	eMarshal, _ := json.Marshal(e)
 	res, err := db.Elastic.Index(
-		db.IdxMessaging,                       // Index name
+		db.IdxEvents,                          // Index name
 		strings.NewReader(string(eMarshal)),   // Document body
 		db.Elastic.Index.WithDocumentID(e.ID), // Document ID
 		db.Elastic.Index.WithRefresh("true"),  // Refresh
@@ -80,7 +80,7 @@ func (events) DeleteOldEvents(messageID string, typ datautils.EventType, ts int6
 		map[string]interface{}{"message_id": i_messageID, "type": typ},
 		map[string]interface{}{"timestamp": map[string]interface{}{"lt": ts}},
 	)
-	values, err := db.FindAll(query, db.IdxMessaging)
+	values, err := db.FindAll(query, db.IdxEvents)
 	if err != nil {
 		return
 	}
@@ -94,7 +94,7 @@ func (events) DeleteOldEvents(messageID string, typ datautils.EventType, ts int6
 		toBeDeleted = append(toBeDeleted, &tbd)
 	}
 	for idx := range toBeDeleted {
-		db.Elastic.Delete(db.IdxMessaging, toBeDeleted[idx].ID)
+		db.Elastic.Delete(db.IdxEvents, toBeDeleted[idx].ID)
 	}
 }
 

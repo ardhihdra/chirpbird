@@ -158,10 +158,8 @@ func NewGroupLeft(g *Group) *Event {
 	return event
 }
 
-func NewMessage(m *Message) *Event {
+func NewMessage(m *Message, user *User) *Event {
 	event := NewEvent(EVENT_MESSAGE, m.CreatedAt)
-	user := &User{ID: m.UserID}
-	user.GetByID()
 	event.Body = EventMessage{
 		MessageID:  m.ID,
 		Data:       m.Body.Data,

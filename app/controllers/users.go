@@ -12,17 +12,26 @@ import (
 	"github.com/ardhihdra/chirpbird/app/models"
 )
 
-type UsersController struct {
+type UsersController interface {
+	Login() http.HandlerFunc
+	Register() http.HandlerFunc
+	Logout() http.HandlerFunc
+	CheckUniqueUsername() http.HandlerFunc
+	GetUsers() http.HandlerFunc
+}
+
+type usersController struct {
 	BaseController
 }
 
-func NewUsersController() *UsersController {
-	return &UsersController{}
+var userModel models.UserModel
+
+func NewUsersController(model models.UserModel) UsersController {
+	userModel = model
+	return &usersController{}
 }
 
-var users = models.NewUsersHandler()
-
-func (usr *UsersController) Login() http.HandlerFunc {
+func (usr *usersController) Login() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPost {
@@ -51,7 +60,7 @@ func (usr *UsersController) Login() http.HandlerFunc {
 		})
 }
 
-func (usr *UsersController) Register() http.HandlerFunc {
+func (usr *usersController) Register() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodPost {
@@ -70,7 +79,7 @@ func (usr *UsersController) Register() http.HandlerFunc {
 				Profile:   profile,
 				Interests: strings.Split(interests, ","),
 			}
-			_, err := users.Register(&user)
+			_, err := userModel.Register(&user)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte("failed to register"))
@@ -78,18 +87,18 @@ func (usr *UsersController) Register() http.HandlerFunc {
 			}
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(map[string]interface{}{"data": user, "token": jwt.Create(user.ID)})
-		})
+		},
+	)
 }
 
-func (usr *UsersController) Logout() http.HandlerFunc {
+func (usr *usersController) Logout() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			// delete User and Session
 			// next step set user and session to nonactive and offline
 			id := r.FormValue("id")
-			user := &datautils.User{ID: id}
-			user.DeleteByID()
-			session, err := datautils.GetSessionByUserID(user.ID)
+			userModel.DeleteByID(id)
+			session, err := datautils.GetSessionByUserID(id)
 			if err != nil {
 				fmt.Println("Failed to delete sesion")
 			}
@@ -100,19 +109,19 @@ func (usr *UsersController) Logout() http.HandlerFunc {
 		})
 }
 
-func (usr *UsersController) CheckUniqueUsername() http.HandlerFunc {
+func (usr *usersController) CheckUniqueUsername() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			// GET users with username
 			username := r.URL.Query().Get("username")
 			user := &datautils.User{Username: username}
-			isValid := user.UsernameAvailable()
+			isValid := userModel.UsernameAvailable(*user)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(map[string]bool{"valid": isValid})
 		})
 }
 
-func (usr *UsersController) GetUsers() http.HandlerFunc {
+func (usr *usersController) GetUsers() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			// GET users with username
@@ -125,13 +134,15 @@ func (usr *UsersController) GetUsers() http.HandlerFunc {
 			username := r.URL.Query().Get("username")
 			var us []datautils.User
 			if id != "" {
-				var user datautils.User
-				user.ID = id
-				user.GetByID()
-				us = append(us, user)
+				user, err := userModel.ByID(id)
+				if err != nil {
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "err while get users"})
+				}
+				us = append(us, *user)
 			} else if username != "" {
 				// find username like
-				user, err := users.ByUsername(username, false)
+				user, err := userModel.ByUsername(username, false)
 				us = *user
 				if err != nil {
 					w.WriteHeader(http.StatusBadRequest)
@@ -143,7 +154,8 @@ func (usr *UsersController) GetUsers() http.HandlerFunc {
 			}
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(map[string]interface{}{"userinfo": us})
-		})
+		},
+	)
 }
 
 func saveLogin(username, country, profile string, interests []string) (*datautils.User, error) {
@@ -153,7 +165,7 @@ func saveLogin(username, country, profile string, interests []string) (*datautil
 	)
 
 	if username != "" {
-		usr, err = users.ByEmail(username)
+		usr, err = userModel.ByEmail(username)
 		if err != nil {
 			return nil, err
 		}
@@ -161,7 +173,7 @@ func saveLogin(username, country, profile string, interests []string) (*datautil
 		return nil, errors.New("username or email is required")
 	}
 
-	if !users.Auth(usr.Password, username) {
+	if !userModel.Auth(usr.Password, username) {
 		return nil, errors.New("password wrong")
 	}
 

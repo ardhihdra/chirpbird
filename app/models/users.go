@@ -1,12 +1,11 @@
 package models
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ardhihdra/chirpbird/app/datautils"
-	"github.com/ardhihdra/chirpbird/app/db"
 	"github.com/ardhihdra/chirpbird/app/helper"
+	"github.com/ardhihdra/chirpbird/app/repository"
 	"github.com/asaskevich/govalidator"
 	"github.com/twinj/uuid"
 
@@ -14,17 +13,35 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type usersHandler struct {
+type UserModel interface {
+	Register(u *datautils.User) (*datautils.User, error)
+	UsernameValid(u *datautils.User) error
+	EmailValid(u *datautils.User) error
+	PasswordValid(u *datautils.User) error
+	ByUsername(username string, exactmatch bool) (*[]datautils.User, error)
+	ByEmail(email string) (*datautils.User, error)
+	ByID(ID string) (*datautils.User, error)
+	Auth(userPassword, password string) bool
+	UsernameAvailable(user datautils.User) bool
+	CheckExpiry(id string) (*datautils.User, error)
+	DeleteByID(id string)
+}
+type userModel struct {
 	UsernameRE string
 }
 
-func NewUsersHandler() *usersHandler {
-	return &usersHandler{
-		UsernameRE: "^[A-Za-z0-9_]{1,15}$", // username length copied from Twitter
+var (
+	repo repository.UserRepository
+)
+
+func NewUsersHandler(repos repository.UserRepository) UserModel {
+	repo = repos
+	return &userModel{
+		UsernameRE: "^[A-Za-z0-9_]{1,15}$",
 	}
 }
 
-func (h *usersHandler) Register(u *datautils.User) (*datautils.User, error) {
+func (h *userModel) Register(u *datautils.User) (*datautils.User, error) {
 	u.ID = uuid.NewV4().String()
 	u.Username = strings.TrimSpace(u.Username)
 	// u.Email = strings.TrimSpace(u.Email)
@@ -50,14 +67,14 @@ func (h *usersHandler) Register(u *datautils.User) (*datautils.User, error) {
 	// }
 	// u.Password = string(hpass)
 
-	if err := u.CreateUser(); err != nil {
+	if err := repo.CreateUser(*u); err != nil {
 		return nil, err
 	}
 
 	return u, nil
 }
 
-func (h *usersHandler) UsernameValid(u *datautils.User) error {
+func (h *userModel) UsernameValid(u *datautils.User) error {
 	if u.Username == "" {
 		return errors.New("username required")
 	}
@@ -66,13 +83,13 @@ func (h *usersHandler) UsernameValid(u *datautils.User) error {
 	//	return errors.New("username invalid")
 	//}
 
-	if !u.UsernameAvailable() {
+	if !repo.UsernameAvailable(*u) {
 		return errors.New("username exists!")
 	}
 	return nil
 }
 
-func (h *usersHandler) EmailValid(u *datautils.User) error {
+func (h *userModel) EmailValid(u *datautils.User) error {
 	if u.Email == "" {
 		return errors.New("email required")
 	}
@@ -81,63 +98,46 @@ func (h *usersHandler) EmailValid(u *datautils.User) error {
 		return errors.New("email invalid")
 	}
 
-	if u.EmailAvailable() {
+	if repo.EmailAvailable(*u) {
 		return errors.New("email exists")
 	}
 	return nil
 }
 
-func (h *usersHandler) PasswordValid(u *datautils.User) error {
+func (h *userModel) PasswordValid(u *datautils.User) error {
 	if u.Password == "" {
 		return errors.New("password required")
 	}
 	return nil
 }
 
-func (h *usersHandler) ByUsername(username string, exactmatch bool) (*[]datautils.User, error) {
-	var u []datautils.User
-	var query map[string]interface{}
-	if exactmatch {
-		query = db.MatchCondition(map[string]interface{}{
-			"username": strings.ToLower(username),
-		})
-	} else {
-		query = db.QueryString(map[string]interface{}{
-			"fields": []string{"username"},
-			"query":  fmt.Sprintf("*%s*", username),
-		})
-	}
-	return &u, datautils.FindAll(query, db.IdxMessaging, &u)
+func (h *userModel) ByUsername(username string, exactmatch bool) (*[]datautils.User, error) {
+	return repo.FindByUsername(username, exactmatch)
 }
 
-func (h *usersHandler) ByEmail(email string) (*datautils.User, error) {
-	var u *datautils.User
-	query := db.MatchCondition(map[string]interface{}{"email": strings.ToLower(email)})
-	return u, datautils.FindOne(query, db.IdxMessaging, &u)
+func (h *userModel) ByEmail(email string) (*datautils.User, error) {
+	return repo.FindByEmail(email)
 }
 
-func (h *usersHandler) ByID(ID string) (*datautils.User, error) {
-	var u *datautils.User
-	query := db.MatchCondition(map[string]interface{}{"id": strings.ToLower(ID)})
-	return u, datautils.FindOne(query, db.IdxMessaging, &u)
+func (h *userModel) ByID(ID string) (*datautils.User, error) {
+	return repo.FindByID(ID)
 }
 
-func (h *usersHandler) Auth(userPassword, password string) bool {
+func (h *userModel) Auth(userPassword, password string) bool {
 	if err := bcrypt.CompareHashAndPassword([]byte(userPassword), []byte(password)); err != nil {
 		return false
 	}
 	return true
 }
 
-func (h *usersHandler) CheckExpiry(id string) (*datautils.User, error) {
-	var u *datautils.User
-	var i_id interface{} = id
-	query := db.MatchFilterCondition(
-		map[string]interface{}{"id": i_id},
-		map[string]interface{}{
-			"created_at": map[string]int64{
-				"gt": datautils.Expiry,
-			}},
-	)
-	return u, datautils.FindOne(query, db.IdxMessaging, &u)
+func (h *userModel) UsernameAvailable(user datautils.User) bool {
+	return repo.UsernameAvailable(user)
+}
+
+func (h *userModel) CheckExpiry(id string) (*datautils.User, error) {
+	return repo.CheckExpiry(id)
+}
+
+func (h *userModel) DeleteByID(id string) {
+	repo.DeleteByID(id)
 }

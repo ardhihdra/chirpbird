@@ -27,7 +27,7 @@ type Session struct {
 func (s *Session) CreateSession() error {
 	sesMarshal, _ := json.Marshal(s)
 	res, err := db.Elastic.Index(
-		db.IdxMessaging,                       // Index name
+		db.IdxSessions,                        // Index name
 		strings.NewReader(string(sesMarshal)), // Document body
 		db.Elastic.Index.WithDocumentID(s.ID), // Document ID
 		db.Elastic.Index.WithRefresh("true"),  // Refresh
@@ -50,7 +50,7 @@ func (s *Session) CreateSession() error {
 // }
 
 func (s *Session) DeleteByID() {
-	db.Elastic.Delete(db.IdxMessaging, s.ID)
+	db.Elastic.Delete(db.IdxSessions, s.ID)
 }
 
 func GetSessionByAccessToken(access_token string) (Session, error) {
@@ -58,7 +58,7 @@ func GetSessionByAccessToken(access_token string) (Session, error) {
 		"access_token": access_token,
 	})
 	var ses Session
-	values, err := db.FindOne(query, db.IdxMessaging)
+	values, err := db.FindOne(query, db.IdxSessions)
 	if err != nil {
 		return ses, err
 	}
@@ -71,7 +71,7 @@ func GetSessionByUserID(userID string) ([]*Session, error) {
 		"user_id": userID,
 	})
 	var sessions []*Session
-	values, err := db.FindAll(query, db.IdxMessaging)
+	values, err := db.FindAll(query, db.IdxSessions)
 	arrVal := values[1].Array()
 	var ses Session
 	for i := range arrVal {

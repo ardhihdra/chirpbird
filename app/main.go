@@ -8,16 +8,28 @@ import (
 
 	"github.com/ardhihdra/chirpbird/app/controllers"
 	"github.com/ardhihdra/chirpbird/app/messaging"
+	"github.com/ardhihdra/chirpbird/app/models"
+	"github.com/ardhihdra/chirpbird/app/repository"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
 
 var (
-	PORT     string
-	CLIENT   string
-	users    = controllers.NewUsersController()
-	groups   = controllers.NewGroupController()
-	sessions = controllers.NewSessionsController()
+	PORT        string
+	CLIENT      string
+	groupRepo   = repository.NewGroupElasticRepository()
+	userRepo    = repository.NewUserElasticRepository()
+	sessionRepo = repository.NewSessionElasticRepository()
+	messageRepo = repository.NewMessageElasticRepository()
+
+	usersModel   = models.NewUsersHandler(userRepo)
+	groupModel   = models.NewGroupsModel(groupRepo)
+	sessionModel = models.NewSessionsModel(sessionRepo)
+	messageModel = models.NewMessageModel(messageRepo)
+
+	users    = controllers.NewUsersController(usersModel)
+	groups   = controllers.NewGroupController(groupModel)
+	sessions = controllers.NewSessionsController(sessionModel)
 )
 
 func main() {
@@ -37,6 +49,8 @@ func main() {
 		AllowCredentials: true,
 	}).Handler(mux)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", PORT), handler))
+
+	messaging.NewMessagingService(usersModel, groupModel, sessionModel, messageModel)
 }
 
 func loadEnv() {

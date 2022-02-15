@@ -14,9 +14,10 @@ func newMessages() *messages {
 
 func (m *messages) Send(c *datautils.UserConnection, p *datautils.RpcMessageSend) {
 	group := withGroup(p.GroupID, c.UserID)
-	msg, _ := models.Messages.Create(p.GroupID, c.UserID, p.Data, helper.Timestamp())
+	msg, _ := messageModel.Create(p.GroupID, c.UserID, p.Data, helper.Timestamp())
+	user, _ := userModel.ByID(msg.UserID)
 
-	e := datautils.NewMessage(msg)
+	e := datautils.NewMessage(msg, user)
 	models.Events.SaveForUsers(msg.ID, group.UserIDs, e)
 
 	es := datautils.NewMessageSent(msg, e.Timestamp)
@@ -29,7 +30,7 @@ func (m *messages) Send(c *datautils.UserConnection, p *datautils.RpcMessageSend
 }
 
 func (m *messages) Read(c *datautils.UserConnection, p *datautils.RpcMessageRead) {
-	msg, err := models.Messages.ByID(p.MessageID)
+	msg, err := messageModel.ByID(p.MessageID)
 	if err != nil {
 		return
 	}
@@ -44,7 +45,7 @@ func (m *messages) Read(c *datautils.UserConnection, p *datautils.RpcMessageRead
 }
 
 func (m *messages) Delivered(c *datautils.UserConnection, p *datautils.RpcMessageDelivered) {
-	msg, err := models.Messages.ByID(p.MessageID)
+	msg, err := messageModel.ByID(p.MessageID)
 	if err != nil {
 		return
 	}
