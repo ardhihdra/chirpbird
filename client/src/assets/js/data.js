@@ -5,6 +5,13 @@ const config = (token) => {
 }
 const MASTER_URL = `http://${process.env.REACT_APP_MASTER_URL}`
 
+const getRandomUsername = () => {
+    const listNames = ['Elon', 'Musk', 'Jeff', 'Bezos', 'Jungkook', 'John', 'Doe', 'Ujang', 'Hitlar', 'Puton']
+    const rand = Math.floor(Math.random() * (listNames.length - 1))
+    const randNum = Math.floor(Math.random() * 1000)
+    return `${listNames[rand]}${randNum}`
+}
+
 const fetchPosts = () => {
     return [
         {
@@ -63,6 +70,7 @@ const EVENT_TYPE = {
 }
 
 export {
+    getRandomUsername,
     fetchPosts,
     fetchGroups,
     EVENT_TYPE

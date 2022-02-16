@@ -1,7 +1,7 @@
-@import url("../../assets/css/grid.css");
+/* @import url("../../assets/css/grid.css"); */
+/* @import url("../../assets/css/spacing.css"); */
+/* @import url("../../assets/css/font.css"); */
 @import url("../../assets/css/color.css");
-@import url("../../assets/css/spacing.css");
-@import url("../../assets/css/font.css");
 @import url("../../assets/css/animation.css");
 
 .ds-align-center {
@@ -31,10 +31,18 @@
 }
 
 .ds-hr {
-  height: 2px;
+  height: 1px;
   border-width: 0;
-  color: gray;
-  background-color: white;
+  color: var(--skyblue-soft);
+  background-color: var(--skyblue-soft);
+  /* color: gray;
+  background-color: white; */
+}
+
+.ds-select {
+  height: 36px;
+  color: var(--primary-font);
+  background-color: transparent;
 }
 
 .ds-modal {
@@ -93,7 +101,7 @@
 }
 
 .tribute {
-  background-color: var(--secondary-background);
+  background-color: var(--blue-soft);
   font-size: 8pt;
 }
 
@@ -119,14 +127,11 @@
 
 .icon-bg {
   background-color: transparent;
-  background-color: var(--secondary-background);
+  background-color: var(--primary-background);
   border-radius: 50%;
-  height: 28px;
-  width: 28px;
-  padding: 6px;
   cursor: pointer;
 }
 
 .icon-bg:hover {
-  background-color: var(--main-background);
+  background-color: var(--secondary-background);
 }

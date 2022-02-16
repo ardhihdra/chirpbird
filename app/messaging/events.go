@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/ardhihdra/chirpbird/app/datautils"
-	"github.com/ardhihdra/chirpbird/app/models"
 )
 
 type Events struct{}
@@ -15,7 +14,7 @@ func newEvents() *Events {
 }
 
 func (e *Events) Get(c *datautils.UserConnection, p *datautils.RpcMessageGet) {
-	es, err := models.Events.GetByUserIDAndTimestamp(c.UserID, p.Timestamp)
+	es, err := BaseModel.EventModel.GetByUserIDAndTimestamp(c.UserID, p.Timestamp)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -32,7 +31,7 @@ func (e *Events) Get(c *datautils.UserConnection, p *datautils.RpcMessageGet) {
 	}
 }
 
-func (e *Events) createMessagePayload(event *models.EventDB) (*datautils.Event, error) {
+func (e *Events) createMessagePayload(event *datautils.EventDB) (*datautils.Event, error) {
 	switch event.Type {
 	case datautils.EVENT_MESSAGE:
 		return e.messagePayload(event.MessageID)
@@ -54,16 +53,16 @@ func (e *Events) createMessagePayload(event *models.EventDB) (*datautils.Event, 
 }
 
 func (e *Events) messagePayload(messageID string) (*datautils.Event, error) {
-	m, err := messageModel.ByID(messageID)
+	m, err := BaseModel.MessageModel.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
-	user, _ := userModel.ByID(m.UserID)
+	user, _ := BaseModel.UserModel.ByID(m.UserID)
 	return datautils.NewMessage(m, user), nil
 }
 
 func (e *Events) messagePayloadSent(messageID string, ts int64) (*datautils.Event, error) {
-	m, err := messageModel.ByID(messageID)
+	m, err := BaseModel.MessageModel.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +70,7 @@ func (e *Events) messagePayloadSent(messageID string, ts int64) (*datautils.Even
 }
 
 func (e *Events) messagePayloadDelivered(messageID string, ts int64) (*datautils.Event, error) {
-	m, err := messageModel.ByID(messageID)
+	m, err := BaseModel.MessageModel.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +78,7 @@ func (e *Events) messagePayloadDelivered(messageID string, ts int64) (*datautils
 }
 
 func (e *Events) messagePayloadRead(messageID string, ts int64) (*datautils.Event, error) {
-	m, err := messageModel.ByID(messageID)
+	m, err := BaseModel.MessageModel.ByID(messageID)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +86,7 @@ func (e *Events) messagePayloadRead(messageID string, ts int64) (*datautils.Even
 }
 
 func (e *Events) messagePayloadGroup(groupID string) (*datautils.Event, error) {
-	g, err := groupModel.GetByID(groupID)
+	g, err := BaseModel.GroupModel.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +94,7 @@ func (e *Events) messagePayloadGroup(groupID string) (*datautils.Event, error) {
 }
 
 func (e *Events) messagePayloadGroupJoined(groupID string) (*datautils.Event, error) {
-	g, err := groupModel.GetByID(groupID)
+	g, err := BaseModel.GroupModel.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +102,7 @@ func (e *Events) messagePayloadGroupJoined(groupID string) (*datautils.Event, er
 }
 
 func (e *Events) messagePayloadGroupLeft(groupID string) (*datautils.Event, error) {
-	g, err := groupModel.GetByID(groupID)
+	g, err := BaseModel.GroupModel.GetByID(groupID)
 	if err != nil {
 		return nil, err
 	}

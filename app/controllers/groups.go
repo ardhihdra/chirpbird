@@ -22,9 +22,11 @@ type groupsController struct {
 }
 
 var groupModel models.GroupModel
+var eventModel models.EventModel
 
-func NewGroupController(model models.GroupModel) GroupsController {
+func NewGroupController(model models.GroupModel, eventM models.EventModel) GroupsController {
 	groupModel = model
+	eventModel = eventM
 	return &groupsController{}
 }
 
@@ -49,7 +51,7 @@ func (gc *groupsController) Create() http.HandlerFunc {
 			}
 			/** announce new group */
 			if eg := datautils.NewGroup(g); eg != nil {
-				models.Events.SaveForUsers(g.ID, g.UserIDs, eg)
+				eventModel.SaveForUsers(g.ID, g.UserIDs, eg)
 				eg.SendToUsers(g.UserIDs)
 			}
 			w.WriteHeader(http.StatusCreated)

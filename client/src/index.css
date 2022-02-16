@@ -1,6 +1,9 @@
 /* -------- */
 /* override */
 /* -------- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Track */
 ::-webkit-scrollbar-track {
@@ -52,9 +55,8 @@ body {
   padding: 0;
   margin: 0;
   position: relative;
-  color: var(--white-font);
+  color: var(--primary-font);
   background-color: var(--blue);
-
 }
 
 code {

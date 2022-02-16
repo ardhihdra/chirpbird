@@ -1,14 +1,23 @@
 :root {
-    --blue: rgb(4, 115, 192);
+    --blue: #A9CEF4;
+    --blue-soft: rgb(84, 141, 182);
+    --blue-secondary: #7EA0B7;
+    --blue-tertiary: #597081;
+    --blue-dark: #36494E;
+    /* --blue: rgb(4, 115, 192);
     --blue-soft: rgb(84, 141, 182);
     --blue-secondary: rgb(54, 169, 251);
     --blue-tertiary: rgb(149, 207, 249);
-    --blue-dark: rgb(50, 73, 90);
+    --blue-dark: rgb(39, 58, 73); */
+    --skyblue: rgb(129, 188, 255);
+    --skyblue-soft: rgb(173, 211, 255);
     --white: #ffffff; 
     --space: white;
     --space-dark: #282c34;
     --secondary-space: #3a3f4e;
     --violet: rgb(156, 59, 248);
+    --violet-soft: thistle;
+    --violet-dark: rgb(58, 0, 112);
     --orange: rgb(249, 162, 0);
     --green: rgb(5, 78, 6);
     --green-secondary: rgb(32, 190, 35);
@@ -22,16 +31,33 @@
     --white-font: white;
     --grey-font: rgb(210, 210, 210);
     --dark-font: rgb(145, 145, 145);
-    --primary-font: var(--blue-soft);
+    --primary-font: var(--blue-dark);
+    --secondary-font: var(--blue-tertiary);
 
-    --main-background: var(--blue-soft);
-    --secondary-background: var(--blue-dark);
+    --main-background: var(--white);
+    --secondary-background: var(--blue);
+
+    --main-button: var(--blue-soft);
+
+    --main-border: var(--blue-dark);
 }
 
 .b-blue {
-  background-color: var(--blue);
+  background-color: var(--blue-tertiary);
+}
+
+.b-background {
+  background-color: var(--main-background);
+}
+
+.b-secondary-background {
+  background-color: var(--secondary-background);
 }
 
 .b-orange {
   background-color: var(--orange);
+}
+
+.text-primary-blue {
+  color: var(--primary-font);
 }

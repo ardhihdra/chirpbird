@@ -21,20 +21,23 @@ var (
 	userRepo    = repository.NewUserElasticRepository()
 	sessionRepo = repository.NewSessionElasticRepository()
 	messageRepo = repository.NewMessageElasticRepository()
+	eventRepo   = repository.NewEventElasticRepository()
 
 	usersModel   = models.NewUsersHandler(userRepo)
 	groupModel   = models.NewGroupsModel(groupRepo)
 	sessionModel = models.NewSessionsModel(sessionRepo)
 	messageModel = models.NewMessageModel(messageRepo)
+	eventModel   = models.NewEventModel(eventRepo)
 
 	users    = controllers.NewUsersController(usersModel)
-	groups   = controllers.NewGroupController(groupModel)
+	groups   = controllers.NewGroupController(groupModel, eventModel)
 	sessions = controllers.NewSessionsController(sessionModel)
 )
 
 func main() {
 	loadEnv()
 	log.Printf("listening to %s, %s", PORT, CLIENT)
+	messaging.NewMessagingService(usersModel, groupModel, sessionModel, messageModel, eventModel)
 
 	mux := http.NewServeMux()
 
@@ -49,8 +52,6 @@ func main() {
 		AllowCredentials: true,
 	}).Handler(mux)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", PORT), handler))
-
-	messaging.NewMessagingService(usersModel, groupModel, sessionModel, messageModel)
 }
 
 func loadEnv() {

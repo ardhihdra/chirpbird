@@ -2,12 +2,14 @@ import React from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import Input from '../../components/Input'
+import Button from '../../components/Button'
 
 import tele from '../../assets/img/icons/telegram.png';
 import mail from '../../assets/img/icons/009-message.png';
 /** thanks to https://gist.github.com/keeguon/2310008 */
 import countries from "../../assets/js/countries"
 import interests from "../../assets/js/interests"
+import { getRandomUsername } from '../../assets/js/data';
 const MASTER_URL = `http://${process.env.REACT_APP_MASTER_URL}`
 const INTERESTS = interests
 
@@ -67,7 +69,7 @@ class LoginForm extends React.Component {
         event.preventDefault();
         // const phoneIndoRegex = /\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/
         const nameExist = this.state.username && this.state.username.length
-        if(!nameExist) this.setState({error_message: 'Username cannot be null!\n'})
+        if(!nameExist) this.setState({error_message: 'Username cannot be empty!\n'})
         if(nameExist) {
             this.setState({'isConfirmationShow': true})
             this.setState({'error_message': ''})
@@ -121,7 +123,15 @@ class LoginForm extends React.Component {
         }
     }
 
-    confirmOrder = () => {
+    quickLogin = (e) => {
+        const uname = getRandomUsername()
+        this.setState({
+            username: uname,
+            country: countries[0],
+            interests: [],
+            profile: ''
+        });
+        this.handleSubmit(e)
     }
 
     styling() {
@@ -207,65 +217,106 @@ class LoginForm extends React.Component {
         const { error, isLoaded, countries } = this.state;
         const style = this.styling()
         const countryList = countries
-        
 
         const page1 = (
-            <div className="ds-fade-in">
-                <h5 className="txt-desc ds-m-4 ds-mt-5" style={style.bluecolor}>
-                    Quick profile for chatting :
+            <div className="ds-fade-in py-6">
+                <h5 className="mb-3" style={style.bluecolor}>
+                    Fill your profile :
                 </h5>
                 <div style={style.flex}>
-                    <Input name="username" value={this.state.username} 
-                        placeholder="Username, How people will address you?" 
-                        onChange={this.handleChange} required={true}/>
-                    <select id="country" name="country" value={this.state.country} onChange={this.handleChange}>
+                    <Input
+                        className="mb-5"
+                        name="username" 
+                        value={this.state.username} 
+                        placeholder="Username" 
+                        onChange={this.handleChange} 
+                        required={true}
+                    />
+                    <select 
+                        id="country"
+                        name="country"
+                        value={this.state.country}
+                        onChange={this.handleChange}
+                        className="ds-select"
+                    >
                         { countryList.map((ctr, idx) => {
                             return (
                                 <option className="ds-option" key={idx} value={ctr.name}>{ctr.name}</option>
                                 )
-                            })}
+                            })
+                        }
                     </select>
                 </div>
-                <div className="ds-m-6" style={{color: 'red'}}>{this.state.error_message}</div>
-                <button className="ds-m-2 ds-mb-5" style={style.buttonSolid} type="button" onClick={() => this.changePage(1)}>Next</button>
-                <hr/>
+                <div className="m-6 text-red-400">{this.state.error_message}</div>
+                <Button 
+                    className="m-2 mb-5"
+                    type="button" 
+                    onClick={() => this.changePage(1)}
+                    label="Next"
+                />
+                <hr class="ds-hr"/>
 
-                <h5 className="txt-topic ds-m-4 ds-mt-4" style={style.bluecolor}>
+                <h5 className="m-4 mt-4" style={style.bluecolor}>
                     Or :
                 </h5>
-                <div className="ds-mt-5 ds-mb-5" style={style.flexRow}>
+                <Button 
+                    type="button"
+                    style="clear"
+                    onClick={this.quickLogin}
+                    label="Go Annonymous"
+                />
+                {/* <div className="mt-5 mb-5" style={style.flexRow}>
                     <div className="ds-p-1" target="_blank" rel="noreferrer">
                         <img className="logo" alt="telegram" src={tele} title="click to open"></img>
                         <div type="button" style={style.bluecolor}>Login Via Telegram</div>
                     </div>
-                    <div className="ds-p-1 ds-ml-4" target="_blank" rel="noreferrer">
+                    <div className="ds-p-1 ml-4" target="_blank" rel="noreferrer">
                         <img className="logo" alt="email" src={mail} title="click to open"></img>
                         <div type="button" style={style.bluecolor}>Login Via Email</div>
                     </div>
-                </div>
+                </div> */}
             </div>
         )
 
         const page2 = (
             <div className="ds-fade-in">
-                <div className="txt-desc ds-mt-4 ds-mb-4 " style={style.bluecolor} htmlFor="country">
+                <div className="txt-desc mt-4 mb-4 " style={style.bluecolor} htmlFor="country">
                     What interest you:
                 </div>
-                { INTERESTS.map(int => {
-                    return (
-                        <div key={int.id} className="ds-mt-1" style={style.flexRow}>
-                            <input id={int.id+int.name} name="interests" type="checkbox" className="ds-mr-5"
-                                value={int.name} onChange={this.handleChange} />
-                            <label className="txt-desc" style={style.bluecolor} htmlFor={int.id+int.name}>{int.name}</label>
-                        </div>
-                    )
-                })}
-                <Input label="Profile" name="profile" value={this.state.profile} 
-                type="textarea"
-                placeholder="Add some details so people can know you better *optional though" 
-                onChange={this.handleChange}/>
-                <button className="ds-m-2 ds-mb-5" style={style.buttonClear} type="button" onClick={() => this.changePage(0)}>Back</button>
-                <button className="ds-m-2 ds-mb-5" style={style.buttonSolid} type="submit" value="Submit">Submit</button>
+                <div className="grid grid-cols-2 mb-5">
+                    { INTERESTS.map(int => {
+                        return (
+                            <div key={int.id} className="grid grid-cols-2 mt-1 mx-2 text-left" style={style.flexRow}>
+                                <input id={int.id+int.name} name="interests" type="checkbox" className="mt-1 mr-5"
+                                    value={int.name} onChange={this.handleChange} />
+                                <div className="txt-desc w-full" style={style.bluecolor} htmlFor={int.id+int.name}>{int.name}</div>
+                            </div>
+                        )
+                    })}
+                </div>
+                <Input
+                    className="mt-3"
+                    label="Profile" 
+                    name="profile" 
+                    value={this.state.profile} 
+                    type="textarea"
+                    placeholder="Add some details so people can know you better" 
+                    onChange={this.handleChange}
+                />
+                <Button 
+                    className="m-2 mb-5"
+                    type="button"
+                    style="clear"
+                    color="danger"
+                    label="Back"
+                    onClick={() => this.changePage(0)}
+                />
+                <Button 
+                    className="m-2 mb-5"
+                    type="submit"
+                    value="Submit"
+                    label="Submit"
+                />
             </div>
         )
 
@@ -273,7 +324,7 @@ class LoginForm extends React.Component {
         else if(!isLoaded) return <div>Loading...</div>;
         else 
         return (
-            <div>
+            <div class="login-form">
                 <form onSubmit={this.handleSubmit}>
                 { 
                 this.state.page === 0 ?

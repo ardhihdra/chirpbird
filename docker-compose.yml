@@ -1,0 +1,95 @@
+version: "3.7"
+
+volumes:
+  esdata01:
+    driver: local
+  esdata02:
+    driver: local
+  # esdata03:
+  #   driver: local
+
+services:
+  lb:
+    image: haproxy
+    ports:
+      - 4000:4000
+    volumes:
+      - ./loadbalancer:/usr/local/etc/haproxy
+  # three seed hosts to add fault tolerance
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02
+      - cluster.initial_master_nodes=es01,es02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    # privileged: true
+    # tty: true
+    ports:
+      - 9200:9200
+    volumes:
+      - esdata01:/usr/local/var/lib/elasticsearch
+      # if you are Windows users then perhaps you need to change to something like c/Users/John or "C:/Users/John"
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01
+      - cluster.initial_master_nodes=es01,es02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata02:/usr/local/var/lib/elasticsearch
+  # es03:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+  #   container_name: es03
+  #   environment:
+  #     - node.name=es03
+  #     - cluster.name=es-docker-cluster
+  #     - discovery.seed_hosts=es01,es02
+  #     - cluster.initial_master_nodes=es01,es02,es03
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   volumes:
+  #     - esdata03:/usr/local/var/lib/elasticsearch
+
+  be01:
+    image: 978879/chirpbird978879
+    container_name: be01
+    build: .
+    restart: on-failure
+    environment:
+        PORT: 4000
+        ES_HOSTS: http://es01:9200,http://es02:9200
+  be02:
+    image: 978879/chirpbird978879
+    container_name: be02
+    build: .
+    restart: on-failure
+    environment:
+        PORT: 4000
+        ES_HOSTS: http://es01:9200,http://es02:9200
+  chirpbird-client:
+    image: 978879/chirpbird-client
+    container_name: chirpbird-client
+    environment:
+      REACT_MASTER_APP_URL: chirpbird
+    ports:
+      - 3000:80

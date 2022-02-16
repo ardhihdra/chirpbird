@@ -17,13 +17,14 @@ var (
 )
 
 func NewMessageModel(repos repository.MessageRepository) MessageModel {
+	messageRepo = repos
 	return &messageModel{}
 }
 
-func (messageModel) ByID(ID string) (*datautils.Message, error) {
+func (m *messageModel) ByID(ID string) (*datautils.Message, error) {
 	return messageRepo.ByID(ID)
 }
 
-func (messageModel) Create(groupID, userID, data string, ts int64) (*datautils.Message, error) {
+func (m *messageModel) Create(groupID, userID, data string, ts int64) (*datautils.Message, error) {
 	return messageRepo.Create(groupID, userID, data, ts)
 }

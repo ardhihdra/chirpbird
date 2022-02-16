@@ -1,11 +1,10 @@
 input[type=text], textarea, select {
     width: 100%;
-    padding: 12px 20px;
-    margin: 2px 0;
+    padding: 4px 6px;
     display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: var(--border-radius-norm);
+    border: 1px solid var(--main-border);
     box-sizing: border-box;
+    background-color: transparent;
 }
 
 .transparent {
@@ -16,26 +15,34 @@ input[type=text], textarea, select {
     color: white;
 }
 
-select {
-    height: 40px;
-    color: var(--primary-font);
+.select-selected {
+    background-color: green;
 }
 
 textarea {
     height: 120px; 
     margin-left: 0;
+    padding: 4px 6px;
+}
+
+textarea::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: var(--secondary-font);
+    opacity: 1; /* Firefox */
 }
 
 input[type=number], select {
     width: 100%;
-    padding: 6px 6px;
-    margin: 8px 0;
+    padding: 4px 6px;
     display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: var(--border-radius-norm);
+    border: 1px solid var(--main-border);
     box-sizing: border-box;
 }
 
 input:focus {
-    border: 1px solid var(--blue);
+    border: 1px solid var(--main-border);
+}
+
+input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: var(--secondary-font);
+    opacity: 1; /* Firefox */
 }

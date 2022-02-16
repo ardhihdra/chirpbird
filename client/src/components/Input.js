@@ -18,12 +18,11 @@ export default class Input extends React.Component {
             label: {
                 fontSize: 'smaller',
                 position: 'relative',
-                top: this.props.type !== 'textarea' ?'-3rem': '-8.5rem',
-                left: '-30%',
+                top: this.props.type !== 'textarea' ?'-4rem': '-9.4rem',
+                left: '-36%',
                 width: 'fit-content',
-                backgroundColor: this.props.label ? 'white': 'transparent',
+                backgroundColor: 'transparent',
                 borderRadius: 'var(--border-radius-sm)',
-                padding: '1px 2px',
                 color: 'var(--primary-font)',
             },
             smallinput: {
@@ -40,23 +39,46 @@ export default class Input extends React.Component {
         const label = this.props.label
         const required = this.props.required
         const type = this.props.type || 'text'
-        const min = type === 'number' ? this.props.min: null
-        const max = type === 'number' ? this.props.max: null 
         const placeholder = this.props.placeholder
-        const style = this.styling()
-        const divClass = `${this.props.className} ds-ml-3 ds-p-1`
+        let min = null
+        let max = null 
+        let styling = this.styling()
+        let style = {}
+        const divClass = `${this.props.className} px-1 rounded text-primary-blue`
+        if(type === 'number') {
+            min = this.props.min
+            max = this.props.max 
+            style = {...styling.smallinput}
+        }
         return (
-            <div className="input">
+            <div>
                 { type !== 'textarea' ? 
-                    <input className={divClass} name={name} type={type} value={value} 
-                        min={min} max={max} style={type === 'number' ? style.smallinput: {}}
-                        placeholder={placeholder} onChange={this.handleChange} onKeyUp={this.handleKeyUp} required={required}/>
+                    <input 
+                        className={divClass}
+                        style={style}
+                        name={name}
+                        type={type}
+                        value={value}
+                        min={min}
+                        max={max}
+                        placeholder={placeholder}
+                        onChange={this.handleChange}
+                        onKeyUp={this.handleKeyUp}
+                        required={required}
+                    />
                 :
-                    <textarea className="ds-p-2 ds-mt-4" name={name} type={type} value={value} 
-                    min={min} max={max} style={type === 'number' ? style.smallinput: {}}
-                    placeholder={placeholder} onChange={this.handleChange} required={required}/>
+                    <textarea 
+                        className={divClass}
+                        style={style}
+                        name={name}
+                        type={type}
+                        value={value}
+                        placeholder={placeholder}
+                        onChange={this.handleChange}
+                        required={required}
+                    />
                 }
-                <span className={this.props.className} style={style.label}>{label}</span>
+                <span style={styling.label}>{label}</span>
             </div>
         )
     }

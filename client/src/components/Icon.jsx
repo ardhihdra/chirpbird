@@ -1,5 +1,4 @@
 import React from 'react';
-import './Input.css';
 export default class Icon extends React.Component {
     constructor(props) {
         super(props);
@@ -9,8 +8,14 @@ export default class Icon extends React.Component {
 
     render() {
         return (
-            <div className={`${this.state.className} ds-col-2 ds-ml-4 icon-bg`}>
-                <img alt="add-member" className="icon" src={this.state.img} height="28" onClick={this.handleClick}/>
+            <div className={`${this.state.className} ml-4`}>
+                <img 
+                    alt="add-member"
+                    className="icon-bg"
+                    src={this.state.img}
+                    height="36"
+                    width="36"
+                    onClick={this.handleClick}/>
             </div>
         )
     }

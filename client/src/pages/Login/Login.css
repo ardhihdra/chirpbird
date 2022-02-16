@@ -12,7 +12,6 @@
 
 .main-section {
     min-height: 100vh;
-    max-width: 600px;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
@@ -21,33 +20,20 @@
     margin-right: auto;
     
     width: 100vw;
-    max-width: 600px;
-}
-  
-.search-title {
-    font-size: 4rem;
-    font-weight: 700;
-    margin: 5px;
+    max-width: 700px;
+    background-image: url('../../assets/img/countries.png');
+    background-repeat: no-repeat;
+    background-position: 0vw 30vh;
+    background-size: 650px;
 }
 
-.search-subtitle {
-    font-size: 1rem;
-    font-weight: 500;
-    margin: 20px 0 40px 0;
-}
-
-.ds-border {
-    background-color: rgb(255, 255, 255);
-}
-
-.form-container {
-    min-height: 50vh;
+.login-form-container {
+    min-height: 40vh;
     text-align: center;
     width: 100%;
-    max-width: 340px;
-    margin: 0 auto 2rem auto;
-    padding: 1rem 3rem;
-    background-color: var(--whitesmoke);
+    max-width: 360px;
+    backdrop-filter: blur(32px);
+    border-color: var(--skyblue-soft);
 }
 
 .contact-info {
@@ -78,12 +64,12 @@
     cursor: copy;
 }
 
-.grow2 {
-    flex-grow: 2;
-}
-
 .hashtag {
     font-weight: 700;
     font-size: calc(14px + .5vmin);
     word-spacing: .5rem;
+}
+
+#title, #subtitle {
+    color: var(--blue-secondary);
 }

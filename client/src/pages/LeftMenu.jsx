@@ -6,7 +6,6 @@ import Icon from '../components/Icon';
 import Button from '../components/Button';
 import RoomForm from './RoomForm.jsx';
 import closeImg from '../assets/img/icons/close.png';
-import addImg from '../assets/img/icons/011-add.png';
 
 import './LeftMenu.css';
 import countries from "../assets/js/countries"
@@ -20,8 +19,9 @@ export default function RightMenu(props) {
     const countryList = countries
     const roomName = props.roomName
     const onUpdateGroup = props.onUpdateGroup
+    const isOpenNew = props.roomForm || false
 
-    const [openRoomForm, setOpenRoomForm] = useState(false)
+    const [openRoomForm, setOpenRoomForm] = useState(isOpenNew)
     const [filterInterests, setFilterInterests] = useState([])
     const [filterCountry, setFilterCountry] = useState()
     const [searchResult, setSearchResult] = useState({ groups: undefined, chatting: undefined})
@@ -42,6 +42,10 @@ export default function RightMenu(props) {
     useEffect(() => {
         searchRooms()
     }, [roomName])
+
+    useEffect(() => {
+        setOpenRoomForm(isOpenNew)
+    }, [isOpenNew])
 
     const searchRooms = async (e) => {
         const data = new FormData()
@@ -83,13 +87,18 @@ export default function RightMenu(props) {
         <div>
             { openRoomForm ? 
                 <div>
-                    <Icon className="ds-mt-3 ds-mr-4 ds-ml-auto" img={closeImg} onClick={roomFormControl} title="cancel"/>
+                    {/* <Icon className="ds-mt-3 mr-4 ml-auto" img={closeImg} onClick={roomFormControl} title="cancel"/> */}
                     <RoomForm onSuccess={updateGroup}/>
                 </div>
                 :
-                <div className="ds-row ds-fade-in">
-                    <div className="left-menu-toolbox ds-col-8">
-                        <select id="country" name="country" value={filterCountry} onChange={handleChange}>
+                <div className="flex flex-col ds-fade-in p-4">
+                    <div className="mb-5">
+                        <select
+                            className="ds-select"
+                            id="country"
+                            name="country"
+                            value={filterCountry}
+                            onChange={handleChange}>
                             { countryList.map((ctr, idx) => {
                                 return (
                                     <option className="ds-option" key={idx} value={ctr.name}>{ctr.name}</option>
@@ -97,33 +106,32 @@ export default function RightMenu(props) {
                                 })}
                         </select>
                     </div>
-                    <div className="left-menu-toolbox ds-col-4">
-                        <div className="ds-flex ds-pt-2">
-                            <div className="txt-desc-meta ds-pt-3 ds-pl-2">New room</div>
-                            <Icon img={addImg} onClick={roomFormControl} title="Create new room"/>
-                        </div>
-                    </div>
-                    <div className="left-menu-toolbox ds-col-12">
+                    <div className="mb-5">
                         <div>Filter interests</div>
-                        <div className="ds-flex">
+                        <div className="grid grid-cols-3">
                             { interests.map(int => {
                                 return (
-                                    <div key={int.id} className="ds-m-3 ds-flex-col">
-                                        <input id={int.id+int.name} name="interests" type="checkbox" className="ds-mr-5"
+                                    <div key={int.id} className="grid grid-cols-4 text-left mr-5">
+                                        <input 
+                                            id={int.id+int.name}
+                                            name="interests"
+                                            type="checkbox" 
+                                            className="mr-2 mt-1"
                                             value={int.name} onChange={handleChange} />
-                                        <label className="txt-desc-meta" htmlFor={int.id+int.name}>{int.name}</label>
+                                        <div className="col-span-3 text-sm w-full" htmlFor={int.id+int.name}>{int.name}</div>
                                     </div>
                                 )
                             })}
                         </div>
                     </div>
-                    <div className="ds-col-12">
-                        <Button className="ds-m-auto" onClick={searchRooms}
-                            label="Filter"></Button>
-                    </div>
-                    <div className="ds-col-12 ds-m-5">
+                    <Button 
+                        className="m-auto" 
+                        onClick={searchRooms}
+                        label="Filter">
+                    </Button>
+                    <div className="ds-col-12 m-5">
                         <hr/>
-                        <div className="ds-m-6">Search Result</div>
+                        <div className="m-6">Search Result</div>
                         <div className="ds-flex-col">
                             {   searchResult.groups  ?
                                 searchResult.groups.map((sr,idx) => {

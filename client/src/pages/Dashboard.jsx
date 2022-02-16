@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import Input from '../components/Input';
 import { EVENT_TYPE, fetchGroups } from '../assets/js/data';
 import menuImg from '../assets/img/icons/menu.png';
-import menuDotImg from '../assets/img/icons/menu-dot.png';
+import settingImg from '../assets/img/icons/settings.png';
+import addImg from '../assets/img/icons/011-add.png';
 import userImg from '../assets/img/icons/010-user.png';
 import attachImg from '../assets/img/icons/attachment.png';
 import submitImg from '../assets/img/icons/submit.png';
@@ -23,6 +24,7 @@ export default function Home(props) {
     const textInput = createRef()
 
     const [menu, setMenu] = useState(false)
+    const [newRoom, setNewRoom] = useState(false)
     const [rightMenu, setRightMenu] = useState(false)
     const [roomName, setRoomName] = useState()
     const [groupList, setGroupList] = useState([])
@@ -40,7 +42,7 @@ export default function Home(props) {
      * 
     */
     // const { id } = useParams();
-    const userinfo = JSON.parse(localStorage.getItem('userinfo'));
+    const userinfo = JSON.parse(localStorage.getItem('userinfo')) || {};
     const payload = sessionStorage.getItem('access_token')
     const token = sessionStorage.getItem('token')
     const config = {
@@ -49,6 +51,7 @@ export default function Home(props) {
     
     const openMenu = (e) => {
         setMenu(!menu)
+        setNewRoom(false)
     }
 
     const openRightMenu = () => {
@@ -68,9 +71,8 @@ export default function Home(props) {
 
     useEffect(() => {
         //componentDidMount
-        if(!userinfo) {
-            navigate(`/login`)
-        } else {
+        if(!userinfo.id) navigate(`/login`)
+        else {
             const user = userinfo
             axios.post(`${MASTER_URL}/users?id=${user.id}`, {}, config)
                 .then(resp => {
@@ -96,6 +98,11 @@ export default function Home(props) {
         }).catch(err => {
             console.log(err)
         })
+    }
+
+    const openNew = () => {
+        setMenu(!menu)
+        setNewRoom(true)
     }
 
     const initSocket = (url) => {
@@ -170,7 +177,6 @@ export default function Home(props) {
     }
 
     const sendMessage = (event) => {
-        console.log("keaskdfyy", event, chatText, activeGroup)
         if(activeGroup.id && chatText) {
             socketConn.send(JSON.stringify({"method":40,"body":{"group_id":activeGroup.id, "data":chatText}}));
         }
@@ -178,34 +184,66 @@ export default function Home(props) {
 
     return (
         <div>
-            <div className="header-menu">
-                <div className="ds-mr-5 icon-bg">
-                    <img alt="profile-menu" src={menuImg} height="28" onClick={openMenu}/>
+            <div className="header-menu w-full grid grid-cols-12 p-2">
+                <div className="mr-4 flex">
+                    <img
+                        className="icon-bg p-1" 
+                        alt="profile-menu" 
+                        height="36px"
+                        width="36px" 
+                        src={menuImg} 
+                        title="menu"
+                        onClick={openMenu}/>
+                    <img
+                        className="icon-bg ml-1 p-1"
+                        alt="profile-menu" 
+                        width="34px" 
+                        src={addImg}
+                        title="buat ruang baru"
+                        onClick={openNew}/>
                 </div>
-                <div className="ds-mr-5 search-input">
-                    <Input placeholder="Search" onChange={handleSearch} value={roomName}></Input>
+                <div className="col-span-3">
+                    <Input
+                        placeholder="Search" 
+                        onChange={handleSearch} 
+                        value={roomName}></Input>
                 </div>
-                <div className="ds-ml-1 ds-mt-1 ds-mb-1 room-pict">
-                    <img alt="profile-pict" src={userImg} height="30"/>
+                <div className="ml-5 pl-5">
+                    <img
+                        className="room-pict"
+                        alt="profile-pict"
+                        height="36px"
+                        width="36px"
+                        src={userImg}/>
                 </div>
-                <div className="ds-ml-5 ds-mt-1 room-title">
+                <div className="ml-5 mt-1 col-span-3 text-left">
                     <div>{activeGroup.name || (userinfo.username ? userinfo.username: '-')}</div>
                     <div className="txt-desc-meta">
                         {activeGroup.user_ids ? activeGroup.user_ids.length: userinfo.country}
                     </div>
                 </div>
-                <div className="ds-mr-5 room-search">
-                    <Input className="transparent night-mode" placeholder="Search in chat"></Input>
+                <div className="ml-6 pl-6 col-span-3 room-search">
+                    {/* <Input className="transparent night-mode" placeholder="Search in chat"></Input> */}
                 </div>
-                <div className="ds-mt-1 ds-mr-5 icon-bg" onClick={openRightMenu}>
-                    <img alt="rooms-menu" src={menuDotImg} height="22px"/>
+                <div className="ml-6 pl-6">
+                    <img
+                        className="icon-bg p-1"
+                        alt="rooms-menu"
+                        height="36px"
+                        width="36px"
+                        src={settingImg}
+                        onClick={openRightMenu}/>
                 </div>
             </div>
             <div className="dashboard-container ds-slide-in">
-                <div className="left-container ds-fade-in">
-                    {menu || groupList.length === 0 ? 
-                        (<LeftMenu roomName={roomName} openForm={groupList.length} onUpdateGroup={getGroups} />) : 
-                        (<RoomList rooms={groupList} onChooseGroup={openDetailGroup}/>)}
+                <div className="left-container drop-shadow-xl">
+                    {menu ? 
+                        (<LeftMenu roomName={roomName} roomForm={newRoom} openForm={groupList.length} onUpdateGroup={getGroups} />) : 
+                        ( groupList.length === 0 ? 
+                            <div className="m-2">You don't have any room yet</div> :
+                            <RoomList rooms={groupList} onChooseGroup={openDetailGroup}/>
+                        )
+                    }
                 </div>
                 <div className="chat-container ds-fade-in">
                     <div className="txt-desc-meta-sm">{activeGroup.name || "no rooms selected"}</div>
@@ -222,15 +260,25 @@ export default function Home(props) {
                             :
                             ''
                     }
-                    <div className="texting-box ds-flex">
-                        <div className="ds-m-3 ds-mt-4 icon-bg">
-                            <img className="" alt="friends-pict" src={attachImg} height="26"/>
+                    <div className="texting-box flex">
+                        <div className="m-3 mt-4">
+                            <img 
+                                className="icon-bg"
+                                alt="friends-pict"
+                                src={attachImg}
+                                width="26"/>
                         </div>
-                        <div className="ds-mt-3">
+                        <div className="mt-3">
                             <Input ref={textInput} className="texting-input" placeholder="Write your thought" onChange={handleChange} value={chatText} />
                         </div>
-                        <div className="ds-m-3 icon-bg">
-                            <img alt="friends-pict" src={submitImg} height="28" onClick={sendMessage}/>
+                        <div className="m-4">
+                            <img
+                                className="icon-bg"
+                                alt="friends-pict"
+                                src={submitImg}
+                                length="26"
+                                width="26"
+                                onClick={sendMessage}/>
                         </div>
                     </div>
                 </div>

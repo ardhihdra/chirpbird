@@ -52,23 +52,9 @@
     word-spacing: .5rem;
 }
 
-.tes1 {
-    border: 1px solid red;
-    background-color: green;
-}
-
-.tes2 {
-    border: 1px solid orange;
-    background-color: violet;
-}
-
 .header-menu {
-    display: flex;
-    width: 100%;
-    height: 40px;
-    padding: .5rem 1rem;
-    background-color: var(--secondary-background);
-    border-bottom: 1px solid var(--grey);
+    background-color: var(--primary-background);
+    border-bottom: 2px solid var(--grey);
 }
 
 .dashboard-container {
@@ -79,11 +65,10 @@
 .left-container {
     width: 37vw;
     height: 100%;
-    overflow-y: auto;
     overflow-x: hidden;
     background-color: var(--grey);
     border-right: 1px solid var(--grey);
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .transparent {
@@ -96,7 +81,7 @@
 
 .room-pict {
     border-radius: 50%;
-    background-color: thistle;
+    background-color: var(--secondary-background);
 }
 
 .room-title {
@@ -118,8 +103,8 @@
 }
 
 .room-preview-box {
-    height: 3rem;
-    padding: 10px;
+    height: 4rem;
+    padding: 5px;
     border-bottom: 1px solid var(--grey);
     border-top: 1px solid var(--grey);
 }
@@ -142,7 +127,7 @@
 
 .chat-username {
     font-weight: 600;
-    color: thistle;
+    color: var(--secondary-background);
 }
 
 .chat-content {
@@ -151,25 +136,15 @@
 }
 
 .texting-box {
-    border-bottom: 1px solid var(--grey-border);
+    border-top: 2px solid var(--grey);
     position: fixed;
-    bottom: 12px;
+    bottom: 16px;
     width: 100%;
     height: fit-content;
     max-height: 180px;
-    background-color: var(--secondary-background);
+    background-color: var(--main-background);
 }
 
 .texting-input {
     min-width: 50vw;
-}
-
-.right-menu {
-    width: 180px;
-    height: 240px;
-    position: absolute;
-    right: 0;
-    background-color: var(--secondary-background);
-    border-radius: var(--border-radius-sm);
-    padding: 1rem;
 }

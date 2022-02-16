@@ -85,25 +85,35 @@ export default function RoomForm(props) {
     }
 
     return (
-        <form className="menu ds-ml-5 ds-mr-5" onSubmit={handleSubmit}>
-            <div className="ds-m-3">Create New Room</div>
-            <Input name="name" placeholder="Room name" onChange={handleChange} value={name}/>
-            <div className="ds-row">
-                <div className="ds-col-10">
+        <form className="menu ds-fade-in ml-5 mr-5" onSubmit={handleSubmit}>
+            <div className="m-3">Create New Room</div>
+            <Input
+                className="mb-4"
+                name="name"
+                placeholder="Room name"
+                onChange={handleChange}
+                value={name}/>
+            <div className="grid grid-cols-12">
+                <div className="col-span-10">
                     <Input name="member" placeholder="Add room member (username)" onChange={handleChange} value={member}/>
                 </div>
-                <div className="ds-col-2 ds-ml-4 icon-bg">
-                    <img alt="add-member" className="icon" src={addImg} height="28" onClick={addMember}/>
+                <div className="col-span-2 ml-4">
+                    <img
+                        className="icon-bg ml-1 p-1"
+                        alt="add-member"
+                        src={addImg}
+                        width="34px"
+                        onClick={addMember}/>
                 </div>
             </div>
             { checkListMember.length ? <div className="txt-desc">User available : {checkListMember.map(cl => cl.username + ", ")}</div>: ''}
             { !checkListMember.length && member.length > 3 ? <div className="txt-desc">User not found</div>: ''}
-            { listMember.length ? <div className="txt-desc ds-mb-2">Member List : </div>: ''}
+            { listMember.length ? <div className="txt-desc mb-2">Member List : </div>: ''}
             {   
                 listMember.map((mem,idx) => {
                     return (
                         mem && mem.id ? 
-                        <div key={idx} className="txt-desc ds-p-1 removable" 
+                        <div key={idx} className="txt-desc p-1 removable" 
                             title="click to delete"
                             onClick={(e) => removeMember(e,idx)}>
                             {mem.username} {Object.keys(styles)}
@@ -111,7 +121,7 @@ export default function RoomForm(props) {
                     )
                 })
             }
-            <Button className="ds-m-5" type="submit" 
+            <Button className="m-5" type="submit" 
                 label="Submit" value="Submit"></Button>
         </form>
     )

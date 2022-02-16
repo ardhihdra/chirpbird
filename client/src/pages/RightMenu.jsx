@@ -26,9 +26,9 @@ export default function RightMenu(props) {
     }
 
     return (
-        <div className="right-menu ds-border ds-flex-column">
+        <div className="right-menu rounded-bl-lg flex">
             <div className="right-menu-list">Hello, {userinfo.username}!</div>
-            <div className="right-menu-footer ds-m-3">
+            <div className="right-menu-footer m-3 mr-6">
                 <Icon img={logoutImg} onClick={logout}/>
             </div>
         </div>

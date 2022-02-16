@@ -13,23 +13,36 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type BaseMessaging struct {
+	UserModel    models.UserModel
+	GroupModel   models.GroupModel
+	MessageModel models.MessageModel
+	SessionModel models.SessionModel
+	EventModel   models.EventModel
+}
+
 var (
 	eventsService  *Events
 	messageService *messages
 	typingService  *typing
-	groupModel     models.GroupModel
-	userModel      models.UserModel
-	messageModel   models.MessageModel
-	sessionModel   models.SessionModel
+	BaseModel      BaseMessaging
 )
 
-func NewMessagingService(userM models.UserModel, groupM models.GroupModel, sessionM models.SessionModel, messageM models.MessageModel) {
+func NewMessagingService(
+	userM models.UserModel,
+	groupM models.GroupModel,
+	sessionM models.SessionModel,
+	messageM models.MessageModel,
+	eventM models.EventModel,
+) {
 	eventsService = newEvents()
-	messageService = newMessages()
+	messageService = newMessages(messageM)
 	typingService = newTyping()
-	userModel = userM
-	groupModel = groupM
-	sessionModel = sessionM
+
+	BaseModel.UserModel = userM
+	BaseModel.GroupModel = groupM
+	BaseModel.SessionModel = sessionM
+	BaseModel.EventModel = eventM
 	go publishListener()
 }
 
@@ -51,7 +64,7 @@ func Start() http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			access_token := r.URL.Query().Get("access_token")
-			s, err := sessionModel.GetByAccessToken(access_token)
+			s, err := BaseModel.SessionModel.GetByAccessToken(access_token)
 			if err != nil {
 				fmt.Println("Error: Unauthorized, wrong token or expired")
 			}
@@ -178,7 +191,7 @@ func HandleMessaging(c *datautils.UserConnection, r *datautils.RPC) {
 }
 
 func withGroup(groupID, userID string) *datautils.Group {
-	g, err := groupModel.ByIDAndUserID(groupID, userID)
+	g, err := BaseModel.GroupModel.ByIDAndUserID(groupID, userID)
 	if err != nil {
 		return nil
 	}

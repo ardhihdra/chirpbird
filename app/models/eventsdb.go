@@ -2,79 +2,40 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
-	"strings"
 
 	"github.com/ardhihdra/chirpbird/app/datautils"
 	"github.com/ardhihdra/chirpbird/app/db"
-	"github.com/twinj/uuid"
+	"github.com/ardhihdra/chirpbird/app/repository"
 )
 
-type EventDB struct {
-	ID        string              `json:"id"`
-	Type      datautils.EventType `json:"type,string"`
-	MessageID string              `json:"message_id"`
-	UserIDs   []string            `json:"user_ids"`
-	Timestamp int64               `json:"timestamp"`
+type EventModel interface {
+	GetByUserIDAndTimestamp(ID string, ts int64) ([]*datautils.EventDB, error)
+	CreateEvent(typ datautils.EventType, messageID string, clientIDs []string, ts int64) (*datautils.EventDB, error)
+	DeleteOldEvents(messageID string, typ datautils.EventType, ts int64)
+	SaveForUser(messageID, userID string, e *datautils.Event)
+	SaveForUsers(messageID string, userIDs []string, e *datautils.Event)
 }
 
-type events struct{}
+type eventModel struct{}
 
-var Events = new(events)
+var (
+	eventRepo repository.EventRepository
+)
 
-func (events) GetByUserIDAndTimestamp(ID string, ts int64) ([]*EventDB, error) {
-	var ev []*EventDB
-	var i_id interface{} = ID
-	query := db.MatchFilterCondition(
-		map[string]interface{}{"user_ids": i_id},
-		map[string]interface{}{"timestamp": map[string]interface{}{"gt": ts}},
-	)
-	values, err := db.FindAll(query, db.IdxEvents)
-	if err != nil {
-		return ev, err
-	}
-	arrVal := values[1].Array()
-	for i := range arrVal {
-		var evd EventDB
-		if err = json.Unmarshal([]byte(arrVal[i].Get("_source").String()), &evd); err != nil {
-			fmt.Println("err", err)
-			return ev, err
-		}
-		ev = append(ev, &evd)
-	}
-	return ev, nil
+func NewEventModel(repos repository.EventRepository) EventModel {
+	eventRepo = repos
+	return &eventModel{}
 }
 
-func (events) CreateEvent(typ datautils.EventType, messageID string, clientIDs []string, ts int64) (*EventDB, error) {
-	e := &EventDB{
-		ID:        uuid.NewV4().String(),
-		Type:      typ,
-		MessageID: messageID,
-		UserIDs:   clientIDs,
-		Timestamp: ts,
-	}
-	eMarshal, _ := json.Marshal(e)
-	res, err := db.Elastic.Index(
-		db.IdxEvents,                          // Index name
-		strings.NewReader(string(eMarshal)),   // Document body
-		db.Elastic.Index.WithDocumentID(e.ID), // Document ID
-		db.Elastic.Index.WithRefresh("true"),  // Refresh
-	)
-	if err != nil {
-		log.Fatalf("ERROR: %s", err)
-		return nil, err
-	}
-	defer res.Body.Close()
-	if res.IsError() {
-		db.PrintErrorResponse(res)
-		return nil, err
-	}
-
-	return e, nil
+func (em *eventModel) GetByUserIDAndTimestamp(ID string, ts int64) ([]*datautils.EventDB, error) {
+	return eventRepo.GetByUserIDAndTimestamp(ID, ts)
 }
 
-func (events) DeleteOldEvents(messageID string, typ datautils.EventType, ts int64) {
+func (em *eventModel) CreateEvent(typ datautils.EventType, messageID string, clientIDs []string, ts int64) (*datautils.EventDB, error) {
+	return eventRepo.CreateEvent(typ, messageID, clientIDs, ts)
+}
+
+func (em *eventModel) DeleteOldEvents(messageID string, typ datautils.EventType, ts int64) {
 	var i_messageID interface{} = messageID
 	query := db.MatchFilterCondition(
 		map[string]interface{}{"message_id": i_messageID, "type": typ},
@@ -84,9 +45,9 @@ func (events) DeleteOldEvents(messageID string, typ datautils.EventType, ts int6
 	if err != nil {
 		return
 	}
-	var toBeDeleted []*EventDB
+	var toBeDeleted []*datautils.EventDB
 	arrVal := values[1].Array()
-	var tbd EventDB
+	var tbd datautils.EventDB
 	for i := range arrVal {
 		if err = json.Unmarshal([]byte(arrVal[i].Get("_source").String()), &tbd); err != nil {
 			return
@@ -98,10 +59,10 @@ func (events) DeleteOldEvents(messageID string, typ datautils.EventType, ts int6
 	}
 }
 
-func (events) SaveForUser(messageID, userID string, e *datautils.Event) {
-	Events.SaveForUsers(messageID, []string{userID}, e)
+func (em *eventModel) SaveForUser(messageID, userID string, e *datautils.Event) {
+	eventRepo.SaveForUser(messageID, userID, e)
 }
 
-func (events) SaveForUsers(messageID string, userIDs []string, e *datautils.Event) {
-	Events.CreateEvent(e.Type, messageID, userIDs, e.Timestamp)
+func (em *eventModel) SaveForUsers(messageID string, userIDs []string, e *datautils.Event) {
+	eventRepo.SaveForUsers(messageID, userIDs, e)
 }

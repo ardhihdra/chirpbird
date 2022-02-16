@@ -76,6 +76,13 @@ type Event struct {
 	Timestamp int64       `json:"timestamp,omitempty"`
 	Body      interface{} `json:"body,omitempty"`
 }
+type EventDB struct {
+	ID        string    `json:"id"`
+	Type      EventType `json:"type,string"`
+	MessageID string    `json:"message_id"`
+	UserIDs   []string  `json:"user_ids"`
+	Timestamp int64     `json:"timestamp"`
+}
 
 /** ws messaging stuff */
 func NewEvent(t EventType, ts int64) *Event {

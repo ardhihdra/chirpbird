@@ -5,7 +5,7 @@ export default class Button extends React.Component {
     constructor(props) {
         super(props);
         this.state = {value: props.value}
-        this.handleSubmitParent = this.props.onSubmit
+        this.handleSubmitParent = this.props.onClick
     }
        
     handleChange = (e) => {
@@ -16,39 +16,33 @@ export default class Button extends React.Component {
     styling = () => {
         const button = {
             cursor: 'pointer',
-            width: '6.5rem',
-            // width: '100%',
+            // minWidth: '6.5rem',
+            width: '100%',
             height: '2.5rem',
             marginLeft: 'auto',
             marginRight: 'auto',
-            border: '2px solid',
-            borderRadius: 'var(--border-radius-norm)',
         }
         const largeButton = {
             width: '100%',
-            // width: '8rem',
-            fontSize: 'larger'
         }
         return {
             button: button,
+            largeButton: largeButton,
             buttonClear: {
                 ...button,
                 backgroundColor: 'white',
-                borderColor: 'var(--blue-soft)',
-                color: 'var(--blue-soft)',
+                border: '1px solid var(--main-button)',
+                color: 'var(--main-button)',
                 cursor: 'pointer'
             },
-            largeButton: largeButton,
             buttonSolid: {
                 ...button,
-                ...largeButton,
-                backgroundColor: 'var(--blue-soft)',
-                borderColor: 'var(--blue-soft)',
+                backgroundColor: 'var(--main-button)',
+                borderColor: 'var(--main-button)',
                 color: 'white',
             },
             cancelButtonSolid: {
                 ...button,
-                ...largeButton,
                 backgroundColor: 'white',
                 borderColor: 'var(--red)',
                 color: 'var(--red)'
@@ -63,16 +57,22 @@ export default class Button extends React.Component {
         const styling = this.styling()
         const size = this.props.size
         const style = this.props.style
-        let divClass = `${this.props.className} ds-m-2 ds-mb-5`
-        if(size === 'lg') divClass += styling.largeButton + ' '
-        if(style === 'clear') {
-            divClass += styling.buttonClear
-        } else {
-            divClass += styling.buttonSolid
-        }
+        const color = this.props.color
+        let background = styling.buttonSolid
+        let divClass = `px-2 border rounded-xl text-base shadow-xl shadow-gray-400 ${this.props.className}`
+        if(style === 'clear') background = styling.buttonClear
+        if(size === 'lg') background = {...background, ...styling.largeButton}
+        if(color === 'danger') background = {...background, ...styling.cancelButtonSolid}
+
         return (
-            <button className={divClass} style={styling.buttonClear} title={title}
-                type={type} onClick={this.state.handleSubmitParent}>{label}</button>
+            <button 
+                className={divClass}
+                style={background}
+                title={title}
+                type={type} 
+                onClick={this.handleSubmitParent}
+            >{label}
+            </button>
         )
     }
 }

@@ -24,7 +24,7 @@ var (
 	Expiry       = helper.Timestamp() - oneday
 )
 
-func (r userRepo) FindByUsername(username string, exactmatch bool) (*[]datautils.User, error) {
+func (r *userRepo) FindByUsername(username string, exactmatch bool) (*[]datautils.User, error) {
 	var u []datautils.User
 	var query map[string]interface{}
 	if exactmatch {
@@ -40,19 +40,19 @@ func (r userRepo) FindByUsername(username string, exactmatch bool) (*[]datautils
 	return &u, FindAll(query, db.IdxUsers, &u)
 }
 
-func (r userRepo) FindByEmail(email string) (*datautils.User, error) {
+func (r *userRepo) FindByEmail(email string) (*datautils.User, error) {
 	var u *datautils.User
 	query := db.MatchCondition(map[string]interface{}{"email": strings.ToLower(email)})
 	return u, FindOne(query, db.IdxUsers, &u)
 }
 
-func (r userRepo) FindByID(ID string) (*datautils.User, error) {
+func (r *userRepo) FindByID(ID string) (*datautils.User, error) {
 	var u *datautils.User
 	query := db.MatchCondition(map[string]interface{}{"id": strings.ToLower(ID)})
 	return u, FindOne(query, db.IdxUsers, &u)
 }
 
-func (r userRepo) CheckExpiry(id string) (*datautils.User, error) {
+func (r *userRepo) CheckExpiry(id string) (*datautils.User, error) {
 	var u *datautils.User
 	var i_id interface{} = id
 	query := db.MatchFilterCondition(
@@ -65,7 +65,7 @@ func (r userRepo) CheckExpiry(id string) (*datautils.User, error) {
 	return u, FindOne(query, db.IdxUsers, &u)
 }
 
-func (r userRepo) EmailAvailable(user datautils.User) bool {
+func (r *userRepo) EmailAvailable(user datautils.User) bool {
 	query := map[string]interface{}{
 		"email": strings.ToLower(user.Email),
 	}
@@ -77,7 +77,7 @@ func (r userRepo) EmailAvailable(user datautils.User) bool {
 	return len(users) == 0
 }
 
-func (r userRepo) UsernameAvailable(u datautils.User) bool {
+func (r *userRepo) UsernameAvailable(u datautils.User) bool {
 	var users []datautils.User
 	expiry := Expiry
 
@@ -103,7 +103,7 @@ func (r userRepo) UsernameAvailable(u datautils.User) bool {
 	return len(users) == 0
 }
 
-func (r userRepo) CreateUser(u datautils.User) error {
+func (r *userRepo) CreateUser(u datautils.User) error {
 	userMarshal, _ := json.Marshal(u)
 	res, err := db.Elastic.Index(
 		db.IdxUsers,
@@ -124,7 +124,7 @@ func (r userRepo) CreateUser(u datautils.User) error {
 	return nil
 }
 
-func (r userRepo) DeleteByID(id string) {
+func (r *userRepo) DeleteByID(id string) {
 	db.Elastic.Delete(db.IdxUsers, id)
 }
 

@@ -1,6 +1,8 @@
 package messaging
 
 import (
+	"fmt"
+
 	"github.com/ardhihdra/chirpbird/app/datautils"
 	"github.com/ardhihdra/chirpbird/app/helper"
 	"github.com/ardhihdra/chirpbird/app/models"
@@ -8,20 +10,24 @@ import (
 
 type messages struct{}
 
-func newMessages() *messages {
+var messageM models.MessageModel
+
+func newMessages(messageModels models.MessageModel) *messages {
+	messageM = messageModels
 	return &messages{}
 }
 
 func (m *messages) Send(c *datautils.UserConnection, p *datautils.RpcMessageSend) {
 	group := withGroup(p.GroupID, c.UserID)
-	msg, _ := messageModel.Create(p.GroupID, c.UserID, p.Data, helper.Timestamp())
-	user, _ := userModel.ByID(msg.UserID)
+	fmt.Println(messageM)
+	msg, _ := messageM.Create(p.GroupID, c.UserID, p.Data, helper.Timestamp())
+	user, _ := BaseModel.UserModel.ByID(msg.UserID)
 
 	e := datautils.NewMessage(msg, user)
-	models.Events.SaveForUsers(msg.ID, group.UserIDs, e)
+	BaseModel.EventModel.SaveForUsers(msg.ID, group.UserIDs, e)
 
 	es := datautils.NewMessageSent(msg, e.Timestamp)
-	models.Events.SaveForUser(msg.ID, group.UserID, es)
+	BaseModel.EventModel.SaveForUser(msg.ID, group.UserID, es)
 
 	// e.SendToUsersWithoutMe(c.SessionID, group.UserIDs)
 	e.SendToUsers(group.UserIDs)
@@ -30,7 +36,7 @@ func (m *messages) Send(c *datautils.UserConnection, p *datautils.RpcMessageSend
 }
 
 func (m *messages) Read(c *datautils.UserConnection, p *datautils.RpcMessageRead) {
-	msg, err := messageModel.ByID(p.MessageID)
+	msg, err := BaseModel.MessageModel.ByID(p.MessageID)
 	if err != nil {
 		return
 	}
@@ -39,13 +45,13 @@ func (m *messages) Read(c *datautils.UserConnection, p *datautils.RpcMessageRead
 		return
 	}
 	e := datautils.NewMessageRead(msg.ID, helper.Timestamp())
-	models.Events.SaveForUser(msg.ID, msg.UserID, e)
+	BaseModel.EventModel.SaveForUser(msg.ID, msg.UserID, e)
 	e.SendToUsersWithoutMe(c.SessionID, []string{msg.UserID, c.UserID})
-	models.Events.DeleteOldEvents(msg.ID, e.Type, e.Timestamp)
+	BaseModel.EventModel.DeleteOldEvents(msg.ID, e.Type, e.Timestamp)
 }
 
 func (m *messages) Delivered(c *datautils.UserConnection, p *datautils.RpcMessageDelivered) {
-	msg, err := messageModel.ByID(p.MessageID)
+	msg, err := BaseModel.MessageModel.ByID(p.MessageID)
 	if err != nil {
 		return
 	}
@@ -54,7 +60,7 @@ func (m *messages) Delivered(c *datautils.UserConnection, p *datautils.RpcMessag
 		return
 	}
 	e := datautils.NewMessageDelivered(msg, helper.Timestamp())
-	models.Events.SaveForUser(msg.ID, msg.UserID, e)
+	BaseModel.EventModel.SaveForUser(msg.ID, msg.UserID, e)
 	e.SendToUsersWithoutMe(c.SessionID, []string{msg.UserID, c.UserID})
-	models.Events.DeleteOldEvents(msg.ID, e.Type, e.Timestamp)
+	BaseModel.EventModel.DeleteOldEvents(msg.ID, e.Type, e.Timestamp)
 }

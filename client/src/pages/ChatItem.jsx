@@ -10,18 +10,18 @@ export default function ChatItem(props) {
     const isSelf = props.isSelf
 
     return (
-        <div className="chatbox ds-flex">
-            <div className="ds-ml-5 ds-mt-1 ds-mb-1 room-pict">
-                <img alt="friends-pict" src={img || userImg} height="40"/>
+        <div className="chatbox flex">
+            <div className="ml-5 mt-3 mb-1">
+                <img className="room-pict" alt="friends-pict" src={img || userImg} width="40"/>
             </div>
-            <div className="ds-ml-5 ds-mt-1">
-                <div className="chat-username" style={isSelf ? {color: 'orange'}:{}}>{name}</div>
-                <div className="ds-flex chat-content">
-                    <div className="txt-desc-sm">{message}</div>
+            <div className="ml-5 mt-1">
+                <div className="chat-username text-sm" style={isSelf ? {color: 'orange'}:{}}>{name}</div>
+                <div className="flex chat-content">
+                    <div className="text-sm">{message}</div>
                 </div>
             </div>
             <div>
-                <div className="txt-desc-meta-sm ds-mt-2">{new Date(date).toDateString()}</div>
+                <div className="text-xs mt-2">{new Date(date).toDateString()}</div>
             </div>
         </div>
     )

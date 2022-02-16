@@ -24,12 +24,12 @@ export default class Confirmation extends React.Component {
 
     render() {
         return (
-            <div className="txt-subheader contact-info ds-pt-6">
+            <div className="txt-subheader contact-info pt-6">
                 <div className="contact-flex">
                     <a href="https://www.instagram.com/kanemufreshdrink.id/"><img className="logo" alt="instagram" src={ig} title="click to open"></img></a>
-                    <div className="grow2 ds-ml-3">Follow us :<br/> kanemufreshdrink.id <br/></div>
-                    <img onClick={() => this.copyCodeToClipboard()} className="logo ds-ml-2 copyable" alt="whatsapp" src={wa} title="click to copy"></img>
-                    <div className="grow2 ds-ml-3">
+                    <div className="grow2 ml-3">Follow us :<br/> kanemufreshdrink.id <br/></div>
+                    <img onClick={() => this.copyCodeToClipboard()} className="logo ml-2 copyable" alt="whatsapp" src={wa} title="click to copy"></img>
+                    <div className="grow2 ml-3">
                         Order & Kemitraan :<br/>
                         <div>+62 8966 2362510 <br/>{this.state.showinfo ? 'Copied!': ''}</div>
                     </div>

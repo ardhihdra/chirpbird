@@ -9,20 +9,23 @@ export default function RoomList(props) {
     return (
         rooms.map(el => {
             return (
-                <div className="room-preview-box ds-flex" onClick={(e) => onChooseGroup(e, el.id)}>
-                    <div className="ds-ml-1 ds-mt-1 ds-mb-1 room-pict">
-                        <img alt="room-pict" src={userImg} height="40"/>
-                    </div>
-                    <div className="ds-ml-5 ds-mt-1 room-title">
+                <div className="room-preview-box flex" onClick={(e) => onChooseGroup(e, el.id)}>
+                    <img
+                        className="mt-2 mb-3 ml-1 room-pict"
+                        alt="room-pict"
+                        src={userImg}
+                        width="32px"
+                        height="32px" />
+                    <div className="ml-5 room-title">
                         <div>{el.name}</div>
-                        <div className="ds-flex">
-                            <div className="txt-desc-sm">room desc :</div>
-                            <div className="txt-desc-meta ds-ml-2">room chatting preview</div>
+                        <div className="flex text-sm">
+                            <div className="">room desc :</div>
+                            <div className="ml-2">room chatting preview</div>
                         </div>
                     </div>
                     <div>
-                        <div className="txt-desc-meta-sm">12/1/2021</div>
-                        <div className="room-unread ds-mt-2 ds-ml-3">{rooms.length}</div>
+                        <div className="text-sm">12/1/2021</div>
+                        <div className="room-unread text-sm mt-1 ml-3">{rooms.length}</div>
                     </div>
                 </div>
             )

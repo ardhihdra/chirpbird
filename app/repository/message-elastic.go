@@ -22,7 +22,7 @@ func NewMessageElasticRepository() MessageRepository {
 	return &messageRepo{}
 }
 
-func (*messageRepo) ByID(ID string) (*datautils.Message, error) {
+func (mr *messageRepo) ByID(ID string) (*datautils.Message, error) {
 	var m datautils.Message
 	query := db.MatchCondition(map[string]interface{}{"id": ID})
 	values, err := db.FindOne(query, db.IdxMessages)
@@ -34,7 +34,7 @@ func (*messageRepo) ByID(ID string) (*datautils.Message, error) {
 	return &m, json.Unmarshal([]byte(values[1].String()), &m)
 }
 
-func (*messageRepo) Create(groupID, userID, data string, ts int64) (*datautils.Message, error) {
+func (mr *messageRepo) Create(groupID, userID, data string, ts int64) (*datautils.Message, error) {
 	m := &datautils.Message{
 		ID:        uuid.NewV4().String(),
 		UserID:    userID,
